@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/07/08 13:49:50 by timurray         ###   ########.fr       */
+/*   Updated: 2025/07/14 15:42:58 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,13 +29,29 @@ void ft_randomize(void* param)
 	{
 		for (uint32_t y = 0; y < image->height; ++y)
 		{
-			// uint32_t color = ft_pixel(
-			// 	rand() % 0xFF, // R
-			// 	rand() % 0xFF, // G
-			// 	rand() % 0xFF, // B
-			// 	rand() % 0xFF  // A
-			// );
-			uint32_t color = ft_pixel(0xff, 0xff, 0xff, 0xff);
+			uint32_t color = ft_pixel(
+				0x00, // R
+				0xBB, // G
+				0x00, // B
+				0xFF  // A
+			);
+			mlx_put_pixel(image, i, y, color);
+		}
+	}
+}
+
+void ft_put_grid()
+{
+	for (uint32_t i = 0; i < image->width; ++i)
+	{
+		for (uint32_t y = 0; y < image->height; ++y)
+		{
+			uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
+			if((i % 20 == 0) && (y % 20 == 0) )
+				color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
+			else
+				color = ft_pixel(0x00, 0x00, 0x00, 0x00);
+
 			mlx_put_pixel(image, i, y, color);
 		}
 	}
@@ -61,26 +77,26 @@ int32_t main(void)
 {
 	mlx_t* mlx;
 
-	// Gotta error check this stuff
-	if (!(mlx = mlx_init(WIDTH, HEIGHT, "MLX42", true)))
+	if (!(mlx = mlx_init(WIDTH, HEIGHT, "FDF", true)))
 	{
 		puts(mlx_strerror(mlx_errno));
 		return(EXIT_FAILURE);
 	}
-	if (!(image = mlx_new_image(mlx, 128, 64)))
+	if (!(image = mlx_new_image(mlx, 500, 500)))
 	{
 		mlx_close_window(mlx);
 		puts(mlx_strerror(mlx_errno));
 		return(EXIT_FAILURE);
 	}
-	if (mlx_image_to_window(mlx, image, 0, 0) == -1)
+	if (mlx_image_to_window(mlx, image, 10, 10) == -1)
 	{
 		mlx_close_window(mlx);
 		puts(mlx_strerror(mlx_errno));
 		return(EXIT_FAILURE);
 	}
 	
-	mlx_loop_hook(mlx, ft_randomize, mlx);
+	// mlx_loop_hook(mlx, ft_randomize, mlx);
+	mlx_loop_hook(mlx, ft_put_grid, mlx);
 	mlx_loop_hook(mlx, ft_hook, mlx);
 
 	mlx_loop(mlx);

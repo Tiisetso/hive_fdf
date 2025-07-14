@@ -6,7 +6,7 @@
 #    By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/08 13:01:37 by timurray          #+#    #+#              #
-#    Updated: 2025/07/08 13:36:25 by timurray         ###   ########.fr        #
+#    Updated: 2025/07/12 13:29:20 by timurray         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,7 @@ OBJECTS = $(SOURCES:.c=.o)
 $(NAME): $(OBJECTS)
 	$(CC) $(OBJECTS) $(MLX42) $(MLX_FLAGS) 
 
-all: $(NAME)
+all: $(NAME)czm-uea4NAP8qdg5kmc
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
