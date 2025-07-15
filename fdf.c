@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/07/14 15:42:58 by timurray         ###   ########.fr       */
+/*   Updated: 2025/07/15 12:50:09 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,19 +42,35 @@ void ft_randomize(void* param)
 
 void ft_put_grid()
 {
-	for (uint32_t i = 0; i < image->width; ++i)
+	for (uint32_t x = 0; x < image->width; ++x)
 	{
 		for (uint32_t y = 0; y < image->height; ++y)
 		{
 			uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
-			if((i % 20 == 0) && (y % 20 == 0) )
+			if((x % 20 == 0) && (y % 20 == 0) )
 				color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
 			else
 				color = ft_pixel(0x00, 0x00, 0x00, 0x00);
 
-			mlx_put_pixel(image, i, y, color);
+			mlx_put_pixel(image, x, y, color);
 		}
 	}
+}
+
+void ft_put_dots()
+{
+	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
+	mlx_put_pixel(image, 10, 10, color);
+	mlx_put_pixel(image, 20, 10, color);
+	mlx_put_pixel(image, 10, 20, color);
+	mlx_put_pixel(image, 20, 20, color);
+
+	color = ft_pixel(0xFF, 0x00, 0x00, 0xFF);
+	mlx_put_pixel(image, 9, 10, color);
+	mlx_put_pixel(image, 18, 15, color);
+	mlx_put_pixel(image, 0, 15, color);
+	mlx_put_pixel(image, 9, 20, color);
+
 }
 
 void ft_hook(void* param)
@@ -88,7 +104,7 @@ int32_t main(void)
 		puts(mlx_strerror(mlx_errno));
 		return(EXIT_FAILURE);
 	}
-	if (mlx_image_to_window(mlx, image, 10, 10) == -1)
+	if (mlx_image_to_window(mlx, image, 50, 50) == -1)
 	{
 		mlx_close_window(mlx);
 		puts(mlx_strerror(mlx_errno));
@@ -96,7 +112,9 @@ int32_t main(void)
 	}
 	
 	// mlx_loop_hook(mlx, ft_randomize, mlx);
-	mlx_loop_hook(mlx, ft_put_grid, mlx);
+	// mlx_loop_hook(mlx, ft_put_grid, mlx);
+
+	mlx_loop_hook(mlx, ft_put_dots, mlx);
 	mlx_loop_hook(mlx, ft_hook, mlx);
 
 	mlx_loop(mlx);
