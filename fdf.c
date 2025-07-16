@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/07/15 15:37:08 by timurray         ###   ########.fr       */
+/*   Updated: 2025/07/16 15:18:42 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,14 +71,15 @@ void ft_put_dots()
 {
 	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
 
-	int rows = 60;
+	int rows = 30;
 	int cols = 20;
 	int i;
 	int j;
 	int x = 0;
 	int y = 0;
-	int spacing = 10;
-	int offset = (int)((rows * spacing) / 2);
+	int spacing = 15;
+	int x_offset = (int)((rows * (spacing) ));
+	int y_offset = (int)((rows * (spacing) ));
 	
 	i = 0;
 	while(i < rows)
@@ -86,8 +87,18 @@ void ft_put_dots()
 		j = 0;
 		while(j < cols)
 		{
-			x = iso_x(i * spacing, j * spacing) + offset;
-			y = iso_y(i * spacing, j * spacing);
+			x = iso_x(i * spacing, j * spacing) + x_offset;
+			y = iso_y(i * spacing, j * spacing) + y_offset;
+
+			if (i % 7 == 0 && j % 13 == 0)
+			{
+				y -= 50;
+			}
+
+			if (i % 11 == 0 && j % 7 == 0)
+			{
+				y += 50;
+			}
 
 			printf("x: %i y: %i, i: %i, j: %i \n", x, y, i, j);
 			mlx_put_pixel(image, x, y, color);
@@ -95,7 +106,6 @@ void ft_put_dots()
 		}
 		i++;
 	}
-
 }
 
 
@@ -124,13 +134,13 @@ int32_t main(void)
 		puts(mlx_strerror(mlx_errno));
 		return(EXIT_FAILURE);
 	}
-	if (!(image = mlx_new_image(mlx, 1000, 900)))
+	if (!(image = mlx_new_image(mlx, 1000, 1000)))
 	{
 		mlx_close_window(mlx);
 		puts(mlx_strerror(mlx_errno));
 		return(EXIT_FAILURE);
 	}
-	if (mlx_image_to_window(mlx, image, 0, 10) == -1)
+	if (mlx_image_to_window(mlx, image, 10, 10) == -1)
 	{
 		mlx_close_window(mlx);
 		puts(mlx_strerror(mlx_errno));
