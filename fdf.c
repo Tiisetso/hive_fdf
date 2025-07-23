@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/07/22 14:17:46 by timurray         ###   ########.fr       */
+/*   Updated: 2025/07/23 13:23:41 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,9 +163,11 @@ void ft_hook(void* param)
 		image->instances[0].x += 5;
 }
 
-int32_t main(void)
+int32_t main(int ac, char **av)
 {
 	mlx_t* mlx;
+
+	
 
 	if (!(mlx = mlx_init(WIDTH, HEIGHT, "FDF", true)))
 	{
@@ -195,3 +197,16 @@ int32_t main(void)
 	mlx_terminate(mlx);
 	return (EXIT_SUCCESS);
 }
+
+/* 
+TODO: Read in FILE
+TODO: Get 2D array of 3D colour points
+	- Read lines
+	- Split on spaces
+	- Split z and colour
+	
+TODO: Transform array in isometric points.
+TODO: Draw lines to connect dots.
+TODO: colour?
+TODO: Orbit rotation?
+ */
