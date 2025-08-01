@@ -1,31 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   fdf.h                                              :+:      :+:    :+:   */
+/*   ft_isdigit.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/08 12:56:35 by timurray          #+#    #+#             */
-/*   Updated: 2025/07/24 16:47:53 by timurray         ###   ########.fr       */
+/*   Created: 2025/04/15 09:05:06 by timurray          #+#    #+#             */
+/*   Updated: 2025/05/05 16:08:44 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FDF_H
-# define FDF_H
+#include "libft.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include "MLX42/include/MLX42/MLX42.h"
-#include <math.h>
-
-typedef struct s_pnt {
-	int x;
-	int y;
-	int z;
-	int u;
-	int v;
-	int32_t rgba;
-} t_pnt;
-
-#endif
+int	ft_isdigit(int c)
+{
+	return (c >= '0' && c <= '9');
+}

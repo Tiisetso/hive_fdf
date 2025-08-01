@@ -1,31 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   fdf.h                                              :+:      :+:    :+:   */
+/*   ft_strlen.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/08 12:56:35 by timurray          #+#    #+#             */
-/*   Updated: 2025/07/24 16:47:53 by timurray         ###   ########.fr       */
+/*   Created: 2025/01/23 18:53:26 by timurray          #+#    #+#             */
+/*   Updated: 2025/05/04 12:38:40 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FDF_H
-# define FDF_H
+#include "libft.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include "MLX42/include/MLX42/MLX42.h"
-#include <math.h>
+size_t	ft_strlen(const char *s)
+{
+	size_t	count;
 
-typedef struct s_pnt {
-	int x;
-	int y;
-	int z;
-	int u;
-	int v;
-	int32_t rgba;
-} t_pnt;
-
-#endif
+	count = 0;
+	while (*(s + count))
+		count++;
+	return (count);
+}

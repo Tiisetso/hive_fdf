@@ -1,31 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   fdf.h                                              :+:      :+:    :+:   */
+/*   ft_memmove.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/08 12:56:35 by timurray          #+#    #+#             */
-/*   Updated: 2025/07/24 16:47:53 by timurray         ###   ########.fr       */
+/*   Created: 2025/04/16 12:26:54 by timurray          #+#    #+#             */
+/*   Updated: 2025/05/07 14:06:44 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FDF_H
-# define FDF_H
+#include "libft.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include "MLX42/include/MLX42/MLX42.h"
-#include <math.h>
+void	*ft_memmove(void *dest, const void *src, size_t n)
+{
+	unsigned char	*tdest;
+	unsigned char	*tsrc;
 
-typedef struct s_pnt {
-	int x;
-	int y;
-	int z;
-	int u;
-	int v;
-	int32_t rgba;
-} t_pnt;
-
-#endif
+	tdest = (unsigned char *)dest;
+	tsrc = (unsigned char *)src;
+	if (tdest <= tsrc)
+	{
+		while (n--)
+			*tdest++ = *tsrc++;
+	}
+	else if (tdest > tsrc)
+	{
+		tdest = tdest + (n - 1);
+		tsrc = tsrc + (n - 1);
+		while (n--)
+			*tdest-- = *tsrc--;
+	}
+	return (dest);
+}

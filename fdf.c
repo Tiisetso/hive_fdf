@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/07/23 13:23:41 by timurray         ###   ########.fr       */
+/*   Updated: 2025/07/25 11:56:19 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ int32_t ft_pixel(int32_t r, int32_t g, int32_t b, int32_t a)
 		}
 	}
 } */
-/* 
+
 void ft_put_grid()
 {
 	for (uint32_t x = 0; x < image->width; ++x)
@@ -55,7 +55,7 @@ void ft_put_grid()
 			mlx_put_pixel(image, x, y, color);
 		}
 	}
-} */
+}
 
 /* int iso_x(int i, int j)
 {
@@ -126,16 +126,16 @@ void ft_put_dots()
 			// x = iso_x(i * spacing, j * spacing) + x_offset;
 			// y = iso_y(i * spacing, j * spacing) + y_offset;
 			if (j == 0 && i == 0)
-				z = +30;
-			else if (j == 14 && i == 14)
-				z = -5;
+				z = 50;
+			else if (j == 14 && i == 29)
+				z = -20;
 			else 
 				z = 0;
 				
 			// y = iso_xz(i * spacing, j * spacing, z) + x_offset;
 			// x = iso_yz(i * spacing, j * spacing, z) + y_offset;
 
-			int alpha = 30;
+			int alpha = 45;
 			x =  iso_u(alpha, i*spacing, j*spacing, z) + x_offset;
 			y = iso_v(alpha, i*spacing, j*spacing, z) + y_offset;
 
@@ -163,7 +163,7 @@ void ft_hook(void* param)
 		image->instances[0].x += 5;
 }
 
-int32_t main(int ac, char **av)
+int32_t main(void)
 {
 	mlx_t* mlx;
 
