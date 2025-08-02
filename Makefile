@@ -6,7 +6,7 @@
 #    By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/08 13:01:37 by timurray          #+#    #+#              #
-#    Updated: 2025/08/02 11:55:14 by timurray         ###   ########.fr        #
+#    Updated: 2025/08/02 13:14:10 by timurray         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,7 +30,7 @@ MLX_FLAGS = -Iinclude -ldl -lglfw -pthread -lm
 
 all: $(NAME)
 
-$(NAME): $(MLX42_BUILD) $(OBJECTS) $(LIBFT) 
+$(NAME): $(MLX42_BUILD) $(LIBFT) $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) $(LIBFT) $(MLX42_BUILD) $(MLX_FLAGS) -o $(NAME) 
 
 %.o: %.c
@@ -54,6 +54,9 @@ clean:
 fclean: clean
 	rm -f $(NAME)
 	make fclean -C $(LIBFT_DIR)
+
+run: $(NAME)
+	./$(NAME)
 
 re: fclean all
 

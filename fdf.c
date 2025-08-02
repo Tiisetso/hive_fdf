@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/07/25 11:56:19 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/02 13:39:31 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,6 +167,14 @@ int32_t main(void)
 {
 	mlx_t* mlx;
 
+	// int		fd;
+	// char	*line;
+	// fd = open("./maps/10-2.fdf", O_RDONLY);
+	// while ((line = get_next_line(fd)))
+	// {
+	// 	ft_printf("%s", line);
+	// 	free(line);
+	// }
 	
 
 	if (!(mlx = mlx_init(WIDTH, HEIGHT, "FDF", true)))
