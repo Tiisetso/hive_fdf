@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/02 13:39:31 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/03 17:14:44 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,51 +163,74 @@ void ft_hook(void* param)
 		image->instances[0].x += 5;
 }
 
-int32_t main(void)
+int check_file(const char *filename, const char *extension)
 {
-	mlx_t* mlx;
+	const char *dot;
+	int ext_length;
 
-	// int		fd;
-	// char	*line;
-	// fd = open("./maps/10-2.fdf", O_RDONLY);
-	// while ((line = get_next_line(fd)))
+	dot = ft_strrchr(filename, '.');
+	ext_length = ft_strlen(extension);
+	if (!dot || dot == filename)
+		return (0);
+	else
+		return (ft_strncmp(dot, extension, ext_length) == 0);
+}
+
+int32_t main(int ac,char **av)
+{
+	// mlx_t* mlx;
+	int fd;
+
+	if (ac != 2)
+		return (EXIT_FAILURE);
+	else
+	{		
+		char	*line;
+		if (check_file(av[1], ".fdf"))
+		{
+			fd = open(av[1], O_RDONLY);
+			while ((line = get_next_line(fd)))
+			{
+				ft_printf("%s", line);
+				free(line);
+			}	
+		}
+		else
+			return (EXIT_FAILURE);
+	}
+
+	// if (!(mlx = mlx_init(WIDTH, HEIGHT, "FDF", true)))
 	// {
-	// 	ft_printf("%s", line);
-	// 	free(line);
+	// 	puts(mlx_strerror(mlx_errno));
+	// 	return(EXIT_FAILURE);
 	// }
-	
-
-	if (!(mlx = mlx_init(WIDTH, HEIGHT, "FDF", true)))
-	{
-		puts(mlx_strerror(mlx_errno));
-		return(EXIT_FAILURE);
-	}
-	if (!(image = mlx_new_image(mlx, 1000, 1000)))
-	{
-		mlx_close_window(mlx);
-		puts(mlx_strerror(mlx_errno));
-		return(EXIT_FAILURE);
-	}
-	if (mlx_image_to_window(mlx, image, 10, 10) == -1)
-	{
-		mlx_close_window(mlx);
-		puts(mlx_strerror(mlx_errno));
-		return(EXIT_FAILURE);
-	}
+	// if (!(image = mlx_new_image(mlx, 1000, 1000)))
+	// {
+	// 	mlx_close_window(mlx);
+	// 	puts(mlx_strerror(mlx_errno));
+	// 	return(EXIT_FAILURE);
+	// }
+	// if (mlx_image_to_window(mlx, image, 10, 10) == -1)
+	// {
+	// 	mlx_close_window(mlx);
+	// 	puts(mlx_strerror(mlx_errno));
+	// 	return(EXIT_FAILURE);
+	// }
 	
 	// mlx_loop_hook(mlx, ft_randomize, mlx);
 	// mlx_loop_hook(mlx, ft_put_grid, mlx);
 
-	mlx_loop_hook(mlx, ft_put_dots, mlx);
-	mlx_loop_hook(mlx, ft_hook, mlx);
+	// mlx_loop_hook(mlx, ft_put_dots, mlx);
+	// mlx_loop_hook(mlx, ft_hook, mlx);
 
-	mlx_loop(mlx);
-	mlx_terminate(mlx);
+	// mlx_loop(mlx);
+	// mlx_terminate(mlx);
 	return (EXIT_SUCCESS);
 }
 
 /* 
-TODO: Read in FILE
+TODO: Array resizing?
+	
 TODO: Get 2D array of 3D colour points
 	- Read lines
 	- Split on spaces

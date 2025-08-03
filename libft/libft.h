@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 16:35:15 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/02 13:16:19 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/03 16:59:09 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@ char	*ft_read_line(char *read_line, int fd);
 int		ft_get_n_index(const char *s, int c);
 char	*ft_n_exist(const char *s, int c);
 char	*get_next_line(int fd);
-size_t	ft_strlen(const char *s);
 char	*ft_strjoin(char const *s1, char const *s2);
 void	*ft_memcpy(void *dest, const void *src, size_t n);
 char	*ft_substr(char const *s, unsigned int start, size_t len);
