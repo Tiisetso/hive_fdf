@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/03 17:14:44 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/04 17:08:17 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,7 @@ void ft_put_dots()
 			// y = iso_xz(i * spacing, j * spacing, z) + x_offset;
 			// x = iso_yz(i * spacing, j * spacing, z) + y_offset;
 
-			int alpha = 45;
+			int alpha = 30;
 			x =  iso_u(alpha, i*spacing, j*spacing, z) + x_offset;
 			y = iso_v(alpha, i*spacing, j*spacing, z) + y_offset;
 
@@ -175,22 +175,42 @@ int check_file(const char *filename, const char *extension)
 	else
 		return (ft_strncmp(dot, extension, ext_length) == 0);
 }
+t_coord *parse(char *line, int y, int *x_count)
+{
+	//split on ,
+	//count items
+	//malloc array of count * t_coord
+	//default colour?
+	// assign
+	
+}
 
-int32_t main(int ac,char **av)
+int32_t main(int ac, char **av)
 {
 	// mlx_t* mlx;
-	int fd;
+	char	*line;
+	int 	fd;
+	t_coord **matrix;
+	size_t	x_count;
+	int x;
+	int y;
 
+	x_count = 0;
+	x = 0;
+	y = 0;
 	if (ac != 2)
 		return (EXIT_FAILURE);
 	else
 	{		
-		char	*line;
 		if (check_file(av[1], ".fdf"))
 		{
 			fd = open(av[1], O_RDONLY);
 			while ((line = get_next_line(fd)))
 			{
+				matrix[y] = parse(line, y, &x_count);
+				//parse line into array of points
+				//Keep track of row for y, column for x, value for x
+				
 				ft_printf("%s", line);
 				free(line);
 			}	
@@ -232,12 +252,12 @@ int32_t main(int ac,char **av)
 TODO: Array resizing?
 	
 TODO: Get 2D array of 3D colour points
-	- Read lines
 	- Split on spaces
 	- Split z and colour
 	
 TODO: Transform array in isometric points.
 TODO: Draw lines to connect dots.
+TODO: zoom?
 TODO: colour?
 TODO: Orbit rotation?
  */
