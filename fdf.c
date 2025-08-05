@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/04 17:08:17 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/05 15:29:31 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,12 +177,37 @@ int check_file(const char *filename, const char *extension)
 }
 t_coord *parse(char *line, int y, int *x_count)
 {
-	//split on ,
-	//count items
-	//malloc array of count * t_coord
-	//default colour?
-	// assign
-	
+	int		x;
+	int		z;
+	int32_t	rgba;
+	char	**points;
+	char	*colour_data;
+	t_coord	*coords;
+
+	rgba = 0xFFFFFF;
+	points = ft_split(line, ' ');
+	while (points[x++])
+		*x_count++;
+	coords = (t_coord *)malloc(sizeof(t_coord) * x);
+	x = 0;
+	while (x < x_count)
+	{
+		if(ft_strchr(points[x], ','))
+		{
+			colour_data = ft_split(points[x], ',');
+			z = ft_atoi(colour_data[0]);
+			rgba = 0xFFFFFF; //TODO: Handle long for int32;
+		}
+		else
+			z = ft_atoi(points[x]);
+		coords[x].x = x;
+		coords[x].y = y;
+		coords[x].z = z;
+		coords[x].rgba = rgba;
+		x++;
+	}
+	//TODO: free points properly
+	return (coords);
 }
 
 int32_t main(int ac, char **av)
@@ -235,7 +260,7 @@ int32_t main(int ac, char **av)
 	// 	mlx_close_window(mlx);
 	// 	puts(mlx_strerror(mlx_errno));
 	// 	return(EXIT_FAILURE);
-	// }
+	// }x
 	
 	// mlx_loop_hook(mlx, ft_randomize, mlx);
 	// mlx_loop_hook(mlx, ft_put_grid, mlx);
@@ -249,15 +274,16 @@ int32_t main(int ac, char **av)
 }
 
 /* 
-TODO: Array resizing?
+TODO: Array resizing! Malloc free. repeat.
 	
 TODO: Get 2D array of 3D colour points
-	- Split on spaces
 	- Split z and colour
+	- atoi?
 	
-TODO: Transform array in isometric points.
+TODO: Transform array to isometric points.
 TODO: Draw lines to connect dots.
 TODO: zoom?
 TODO: colour?
 TODO: Orbit rotation?
+TODO: unsigned ints instead?
  */
