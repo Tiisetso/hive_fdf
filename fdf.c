@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/05 15:29:31 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/06 15:46:42 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,62 +21,6 @@ int32_t ft_pixel(int32_t r, int32_t g, int32_t b, int32_t a)
 {
     return (r << 24 | g << 16 | b << 8 | a);
 }
-
-/* void ft_randomize(void* param)
-{
-	(void)param;
-	for (uint32_t i = 0; i < image->width; ++i)
-	{
-		for (uint32_t y = 0; y < image->height; ++y)
-		{
-			uint32_t color = ft_pixel(
-				0x00, // R
-				0xBB, // G
-				0x00, // B
-				0xFF  // A
-			);
-			mlx_put_pixel(image, i, y, color);
-		}
-	}
-} */
-
-void ft_put_grid()
-{
-	for (uint32_t x = 0; x < image->width; ++x)
-	{
-		for (uint32_t y = 0; y < image->height; ++y)
-		{
-			uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
-			if((x % 20 == 0) && (y % 20 == 0) )
-				color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
-			else
-				color = ft_pixel(0x00, 0x00, 0x00, 0x00);
-
-			mlx_put_pixel(image, x, y, color);
-		}
-	}
-}
-
-/* int iso_x(int i, int j)
-{
-	return (int)round((i - j) * (sqrt(3.0) / 2.0));
-}
-
-int iso_y(int i, int j)
-{
-	return ((int)(round((i+j) * 0.5)));
-}
-
-int iso_xz(int x, int y, int z)
-{
-	(void)y;
-	return ((int)(round((x - z)/sqrt(2.0))));
-}
-
-int iso_yz(int x, int y, int z)
-{
-	return ((int)(round((x + 2*y + z)/sqrt(6.0))));
-} */
 
 double rad(int deg)
 {
@@ -99,52 +43,6 @@ int iso_v(int alpha, double x, double y, double z)
 	z = z * sin(rad(alpha - 120));
 
 	return ((int)round(x + y + z));
-}
-
-
-void ft_put_dots()
-{
-	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
-
-	int rows = 30;
-	int cols = 15;
-	int i;
-	int j;
-	int x = 0;
-	int y = 0;
-	int z = 0;
-	int spacing = 15;
-	int x_offset = (int)((rows * (spacing) ));
-	int y_offset = (int)((rows * (spacing)/2 ));
-	
-	i = 0;
-	while(i < rows)
-	{
-		j = 0;
-		while(j < cols)
-		{
-			// x = iso_x(i * spacing, j * spacing) + x_offset;
-			// y = iso_y(i * spacing, j * spacing) + y_offset;
-			if (j == 0 && i == 0)
-				z = 50;
-			else if (j == 14 && i == 29)
-				z = -20;
-			else 
-				z = 0;
-				
-			// y = iso_xz(i * spacing, j * spacing, z) + x_offset;
-			// x = iso_yz(i * spacing, j * spacing, z) + y_offset;
-
-			int alpha = 30;
-			x =  iso_u(alpha, i*spacing, j*spacing, z) + x_offset;
-			y = iso_v(alpha, i*spacing, j*spacing, z) + y_offset;
-
-			printf("x: %i y: %i, i: %i, j: %i \n", x, y, i, j);
-			mlx_put_pixel(image, x, y, color);
-			j++;
-		}
-		i++;
-	}
 }
 
 void ft_hook(void* param)
@@ -181,16 +79,18 @@ t_coord *parse(char *line, int y, int *x_count)
 	int		z;
 	int32_t	rgba;
 	char	**points;
-	char	*colour_data;
+	char	**colour_data;
 	t_coord	*coords;
 
 	rgba = 0xFFFFFF;
-	points = ft_split(line, ' ');
+	points = ft_split(line, ' '); //TODO: check for failure
+	x = 0;
+	*x_count = 0;
 	while (points[x++])
-		*x_count++;
+		(*x_count)++;
 	coords = (t_coord *)malloc(sizeof(t_coord) * x);
 	x = 0;
-	while (x < x_count)
+	while (x < *x_count)
 	{
 		if(ft_strchr(points[x], ','))
 		{
@@ -206,9 +106,11 @@ t_coord *parse(char *line, int y, int *x_count)
 		coords[x].rgba = rgba;
 		x++;
 	}
-	//TODO: free points properly
+	//TODO: free points array.
 	return (coords);
 }
+
+
 
 int32_t main(int ac, char **av)
 {
@@ -216,9 +118,12 @@ int32_t main(int ac, char **av)
 	char	*line;
 	int 	fd;
 	t_coord **matrix;
-	size_t	x_count;
+	t_coord **temp;
+	int	x_count;
 	int x;
+	int y_count;
 	int y;
+	int i;
 
 	x_count = 0;
 	x = 0;
@@ -226,15 +131,31 @@ int32_t main(int ac, char **av)
 	if (ac != 2)
 		return (EXIT_FAILURE);
 	else
-	{		
+	{
+		matrix = (t_coord **)malloc(sizeof(t_coord *));
+		y_count = 1;
 		if (check_file(av[1], ".fdf"))
 		{
 			fd = open(av[1], O_RDONLY);
 			while ((line = get_next_line(fd)))
 			{
-				matrix[y] = parse(line, y, &x_count);
-				//parse line into array of points
-				//Keep track of row for y, column for x, value for x
+				matrix[y] = parse(line, y, &x);
+				if(x < x_count)
+					x = x_count;
+				y++;
+				if (y == y_count)
+				{
+					y_count++;
+					temp = (t_coord **)malloc(sizeof(t_coord *) * y_count); //TODO: Memory
+					i = 0;
+					while (i < y)
+					{
+						temp[i] = matrix[i];
+						i++;
+					}
+					free(matrix);
+					matrix = temp;
+				}
 				
 				ft_printf("%s", line);
 				free(line);
@@ -274,16 +195,20 @@ int32_t main(int ac, char **av)
 }
 
 /* 
-TODO: Array resizing! Malloc free. repeat.
-	
-TODO: Get 2D array of 3D colour points
-	- Split z and colour
-	- atoi?
-	
+TODO: Leaks, leaks, leaks. Correctly free.
+
+TODO: Let's see those dots.
 TODO: Transform array to isometric points.
-TODO: Draw lines to connect dots.
-TODO: zoom?
+
+TODO: Let's connect those dots.
+
 TODO: colour?
+TODO: atoi/atol?
+TODO: zoom on scroll.
+
+TODO: unsigned ints instead? Yeah come on.
+
+TODO: Resize the window?
+TODO: Colour transition
 TODO: Orbit rotation?
-TODO: unsigned ints instead?
  */
