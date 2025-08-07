@@ -6,13 +6,13 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/06 15:46:42 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/07 15:53:01 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fdf.h"
 
-#define WIDTH 1080
+#define WIDTH 1920
 #define HEIGHT 1920
 
 static mlx_image_t* image;
@@ -82,7 +82,7 @@ t_coord *parse(char *line, int y, int *x_count)
 	char	**colour_data;
 	t_coord	*coords;
 
-	rgba = 0xFFFFFF;
+	rgba = 0xFFFFBB;
 	points = ft_split(line, ' '); //TODO: check for failure
 	x = 0;
 	*x_count = 0;
@@ -110,43 +110,79 @@ t_coord *parse(char *line, int y, int *x_count)
 	return (coords);
 }
 
-
+void ft_grid(t_coord **m, int max_x, int max_y)
+{
+	int x;
+	int y;
+	int gap;
+	int alpha;
+	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
+	int x_offset = WIDTH / 2;
+	int y_offset = HEIGHT / 2;
+	
+	y = 0;
+	gap = 25;
+	alpha = 30;
+	while (y < max_y)
+	{
+		x = 0;
+		while (x < max_x)
+		{
+			m[y][x].u = iso_u(alpha, m[y][x].x*gap, m[y][x].y*gap, m[y][x].z*gap) + x_offset;
+			m[y][x].v = iso_v(alpha, m[y][x].x*gap, m[y][x].y*gap, m[y][x].z*gap) + y_offset;
+			mlx_put_pixel(image, m[y][x].u, m[y][x].v, color);
+			x++;
+		}
+		y++;
+	}
+}
 
 int32_t main(int ac, char **av)
 {
-	// mlx_t* mlx;
+	mlx_t* mlx;
 	char	*line;
 	int 	fd;
 	t_coord **matrix;
 	t_coord **temp;
-	int	x_count;
+
+	int	x_max;
+	int y_max;
 	int x;
-	int y_count;
 	int y;
 	int i;
+	int cap;
 
-	x_count = 0;
+	x_max = 0;
+	y_max = 0;
 	x = 0;
 	y = 0;
 	if (ac != 2)
 		return (EXIT_FAILURE);
 	else
 	{
-		matrix = (t_coord **)malloc(sizeof(t_coord *));
-		y_count = 1;
 		if (check_file(av[1], ".fdf"))
 		{
 			fd = open(av[1], O_RDONLY);
+			if(fd == -1)
+			{
+				ft_printf("File: %s not found.", av[1]);
+				return (EXIT_FAILURE);
+			}
+			ft_printf("\n\nfd: %i\n\n", fd);
+			matrix = (t_coord **)malloc(sizeof(t_coord *));
+			cap = 1;
 			while ((line = get_next_line(fd)))
 			{
+				x = 0;
 				matrix[y] = parse(line, y, &x);
-				if(x < x_count)
-					x = x_count;
 				y++;
-				if (y == y_count)
+				if(x > x_max)
+					x_max = x;
+				if (y >= cap)
 				{
-					y_count++;
-					temp = (t_coord **)malloc(sizeof(t_coord *) * y_count); //TODO: Memory
+					temp = (t_coord **)malloc(sizeof(t_coord *) * ++cap);
+					if(!temp)
+						return (EXIT_FAILURE);
 					i = 0;
 					while (i < y)
 					{
@@ -156,57 +192,54 @@ int32_t main(int ac, char **av)
 					free(matrix);
 					matrix = temp;
 				}
-				
 				ft_printf("%s", line);
 				free(line);
-			}	
+			}
+			y_max = y;
 		}
 		else
 			return (EXIT_FAILURE);
 	}
 
-	// if (!(mlx = mlx_init(WIDTH, HEIGHT, "FDF", true)))
-	// {
-	// 	puts(mlx_strerror(mlx_errno));
-	// 	return(EXIT_FAILURE);
-	// }
-	// if (!(image = mlx_new_image(mlx, 1000, 1000)))
-	// {
-	// 	mlx_close_window(mlx);
-	// 	puts(mlx_strerror(mlx_errno));
-	// 	return(EXIT_FAILURE);
-	// }
-	// if (mlx_image_to_window(mlx, image, 10, 10) == -1)
-	// {
-	// 	mlx_close_window(mlx);
-	// 	puts(mlx_strerror(mlx_errno));
-	// 	return(EXIT_FAILURE);
-	// }x
-	
-	// mlx_loop_hook(mlx, ft_randomize, mlx);
-	// mlx_loop_hook(mlx, ft_put_grid, mlx);
+	if (!(mlx = mlx_init(WIDTH, HEIGHT, "FDF", true)))
+	{
+		puts(mlx_strerror(mlx_errno));
+		return(EXIT_FAILURE);
+	}
+	if (!(image = mlx_new_image(mlx, WIDTH, HEIGHT)))
+	{
+		mlx_close_window(mlx);
+		puts(mlx_strerror(mlx_errno));
+		return(EXIT_FAILURE);
+	}
+	if (mlx_image_to_window(mlx, image, 0, 0) == -1)
+	{
+		mlx_close_window(mlx);
+		puts(mlx_strerror(mlx_errno));
+		return(EXIT_FAILURE);
+	}
 
-	// mlx_loop_hook(mlx, ft_put_dots, mlx);
-	// mlx_loop_hook(mlx, ft_hook, mlx);
+	ft_grid(matrix, x_max, y_max);
 
-	// mlx_loop(mlx);
-	// mlx_terminate(mlx);
+	mlx_loop_hook(mlx, ft_hook, mlx);
+	mlx_loop(mlx);
+	mlx_terminate(mlx);
 	return (EXIT_SUCCESS);
 }
 
 /* 
 TODO: Leaks, leaks, leaks. Correctly free.
 
-TODO: Let's see those dots.
-TODO: Transform array to isometric points.
+TODO: Let's connect those dots. to the right and down?
 
-TODO: Let's connect those dots.
+TODO: Image size to include all points. Drawing off to the left?
 
 TODO: colour?
 TODO: atoi/atol?
 TODO: zoom on scroll.
 
 TODO: unsigned ints instead? Yeah come on.
+TODO: Norminette.
 
 TODO: Resize the window?
 TODO: Colour transition
