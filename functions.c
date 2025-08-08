@@ -1,4 +1,4 @@
-void ft_randomize(void* param)
+/* void ft_randomize(void* param)
 {
 	(void)param;
 	for (uint32_t i = 0; i < image->width; ++i)
@@ -31,7 +31,7 @@ void ft_put_grid()
 			mlx_put_pixel(image, x, y, color);
 		}
 	}
-}
+} */
 
 /* int iso_x(int i, int j)
 {
@@ -54,7 +54,7 @@ int iso_yz(int x, int y, int z)
 	return ((int)(round((x + 2*y + z)/sqrt(6.0))));
 } */
 
-void ft_put_dots()
+/* void ft_put_dots()
 {
 	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
 
@@ -97,4 +97,4 @@ void ft_put_dots()
 		}
 		i++;
 	}
-}
+} */

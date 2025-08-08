@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/07 15:53:01 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/08 12:57:11 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,117 @@ t_coord *parse(char *line, int y, int *x_count)
 	return (coords);
 }
 
+void line_low(int x0, int y0, int x1, int y1)
+{
+	int dx;
+	int dy;
+	int yi;
+	int d;
+	int y;
+	int x;
+
+	dx = x1 - x0;
+	dy = y1 - y0;
+	yi = 1;
+
+	if(dy < 0)
+	{
+		yi = -1;
+		dy = -dy;
+	}
+	d = (2 * dy) - dx;
+	y = y0;
+
+	x = x0;
+	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
+	while (x < x1)
+	{
+		mlx_put_pixel(image, x, y, color);
+		if (d > 0)
+		{
+			y = y + yi;
+			d = d + (2 *(dy - dx));
+		}
+		else
+		{
+			d = d + (2*dy);
+		}
+		x++;
+	}
+}
+
+void line_high(int x0, int y0, int x1, int y1)
+{
+	int dx;
+	int dy;
+	int xi;
+	int d;
+	int y;
+	int x;
+
+	dx = x1 - x0;
+	dy = y1 - y0;
+	xi = 1;
+
+	if(dx < 0)
+	{
+		xi = -1;
+		dx = -dx;
+	}
+	d = (2 * dx) - dy;
+	x = x0;
+	
+	y = y0;
+	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
+	while (y < y1)
+	{
+		mlx_put_pixel(image, x, y, color);
+		if (d > 0)
+		{
+			x = x + xi;
+			d = d + (2 *(dx - dy));
+		}
+		else
+		{
+			d = d + (2*dx);
+		}
+		y++;
+	}
+}
+
+void bresenham(t_coord start, t_coord end)
+{
+	int dy;
+	int dx;
+
+	dy = abs(end.v - start.v);
+	dx = abs(end.u - start.u);
+	
+	if (dy < dx)
+	{
+		if (start.u > end.u)
+			line_low(end.u, end.v, start.u, start.v);
+		else
+			line_low(start.u, start.v, end.u, end.v);
+	}
+	else
+	{
+		if (start.v > end.v)
+			line_high(end.u, end.v, start.u, start.v);
+		else
+			line_high(start.u, start.v, end.u, end.v);
+	}
+}
+
+void ft_draw_line(t_coord **m, int max_x, int max_y)
+{
+	//loop through each point
+	//put pixels if point is within bounds.
+	(void)max_x;
+	(void)max_y;
+	bresenham(m[2][2], m[2][3]);
+}
+
 void ft_grid(t_coord **m, int max_x, int max_y)
 {
 	int x;
@@ -121,16 +232,17 @@ void ft_grid(t_coord **m, int max_x, int max_y)
 	int y_offset = HEIGHT / 2;
 	
 	y = 0;
-	gap = 25;
+	gap = 35;
 	alpha = 30;
 	while (y < max_y)
 	{
 		x = 0;
 		while (x < max_x)
 		{
-			m[y][x].u = iso_u(alpha, m[y][x].x*gap, m[y][x].y*gap, m[y][x].z*gap) + x_offset;
-			m[y][x].v = iso_v(alpha, m[y][x].x*gap, m[y][x].y*gap, m[y][x].z*gap) + y_offset;
+			m[y][x].u = iso_u(alpha, m[y][x].x*gap, m[y][x].y*gap, m[y][x].z*(gap)) + x_offset;
+			m[y][x].v = iso_v(alpha, m[y][x].x*gap, m[y][x].y*gap, m[y][x].z*(gap)) + y_offset;
 			mlx_put_pixel(image, m[y][x].u, m[y][x].v, color);
+			
 			x++;
 		}
 		y++;
@@ -168,7 +280,6 @@ int32_t main(int ac, char **av)
 				ft_printf("File: %s not found.", av[1]);
 				return (EXIT_FAILURE);
 			}
-			ft_printf("\n\nfd: %i\n\n", fd);
 			matrix = (t_coord **)malloc(sizeof(t_coord *));
 			cap = 1;
 			while ((line = get_next_line(fd)))
@@ -192,7 +303,7 @@ int32_t main(int ac, char **av)
 					free(matrix);
 					matrix = temp;
 				}
-				ft_printf("%s", line);
+				// ft_printf("%s", line); //TODO: Remove
 				free(line);
 			}
 			y_max = y;
@@ -220,6 +331,8 @@ int32_t main(int ac, char **av)
 	}
 
 	ft_grid(matrix, x_max, y_max);
+	ft_draw_line(matrix, x_max, y_max);
+
 
 	mlx_loop_hook(mlx, ft_hook, mlx);
 	mlx_loop(mlx);
@@ -238,7 +351,7 @@ TODO: colour?
 TODO: atoi/atol?
 TODO: zoom on scroll.
 
-TODO: unsigned ints instead? Yeah come on.
+TODO: unsigned ints instead?
 TODO: Norminette.
 
 TODO: Resize the window?
