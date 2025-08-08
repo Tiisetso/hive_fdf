@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/08 12:57:11 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/08 15:30:40 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,36 +116,28 @@ void line_low(int x0, int y0, int x1, int y1)
 	int dy;
 	int yi;
 	int d;
-	int y;
-	int x;
+	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
 
 	dx = x1 - x0;
 	dy = y1 - y0;
 	yi = 1;
-
-	if(dy < 0)
+	if (dy < 0)
 	{
 		yi = -1;
 		dy = -dy;
 	}
 	d = (2 * dy) - dx;
-	y = y0;
-
-	x = x0;
-	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
-	while (x < x1)
+	while (x0 <= x1)
 	{
-		mlx_put_pixel(image, x, y, color);
+		mlx_put_pixel(image, x0, y0, color);
 		if (d > 0)
 		{
-			y = y + yi;
+			y0 = y0 + yi;
 			d = d + (2 *(dy - dx));
 		}
 		else
-		{
 			d = d + (2*dy);
-		}
-		x++;
+		x0++;
 	}
 }
 
@@ -172,7 +164,7 @@ void line_high(int x0, int y0, int x1, int y1)
 	
 	y = y0;
 	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
-	while (y < y1)
+	while (y <= y1)
 	{
 		mlx_put_pixel(image, x, y, color);
 		if (d > 0)
@@ -195,7 +187,6 @@ void bresenham(t_coord start, t_coord end)
 
 	dy = abs(end.v - start.v);
 	dx = abs(end.u - start.u);
-	
 	if (dy < dx)
 	{
 		if (start.u > end.u)
@@ -214,11 +205,23 @@ void bresenham(t_coord start, t_coord end)
 
 void ft_draw_line(t_coord **m, int max_x, int max_y)
 {
-	//loop through each point
-	//put pixels if point is within bounds.
-	(void)max_x;
-	(void)max_y;
-	bresenham(m[2][2], m[2][3]);
+	int x;
+	int y;
+
+	y = 0;
+	while (y < max_y)
+	{
+		x = 0;
+		while (x < max_x)
+		{
+			if ((y + 1) < max_y)
+				bresenham(m[y][x], m[y + 1][x]);
+			if ((x + 1) < max_x)
+				bresenham(m[y][x], m[y][x + 1]);
+			x++;
+		}
+		y++;
+	}
 }
 
 void ft_grid(t_coord **m, int max_x, int max_y)
@@ -232,15 +235,15 @@ void ft_grid(t_coord **m, int max_x, int max_y)
 	int y_offset = HEIGHT / 2;
 	
 	y = 0;
-	gap = 35;
+	gap = 15;
 	alpha = 30;
 	while (y < max_y)
 	{
 		x = 0;
 		while (x < max_x)
 		{
-			m[y][x].u = iso_u(alpha, m[y][x].x*gap, m[y][x].y*gap, m[y][x].z*(gap)) + x_offset;
-			m[y][x].v = iso_v(alpha, m[y][x].x*gap, m[y][x].y*gap, m[y][x].z*(gap)) + y_offset;
+			m[y][x].u = iso_u((alpha), m[y][x].x*gap, m[y][x].y*gap, m[y][x].z*(gap)) + x_offset;
+			m[y][x].v = iso_v((alpha), m[y][x].x*gap, m[y][x].y*gap, m[y][x].z*(gap)) + y_offset;
 			mlx_put_pixel(image, m[y][x].u, m[y][x].v, color);
 			
 			x++;
@@ -343,18 +346,17 @@ int32_t main(int ac, char **av)
 /* 
 TODO: Leaks, leaks, leaks. Correctly free.
 
-TODO: Let's connect those dots. to the right and down?
-
 TODO: Image size to include all points. Drawing off to the left?
 
+TODO: what about .fdfxxxx?
+
 TODO: colour?
+TODO: Colour transition
 TODO: atoi/atol?
+
 TODO: zoom on scroll.
 
-TODO: unsigned ints instead?
 TODO: Norminette.
 
-TODO: Resize the window?
-TODO: Colour transition
 TODO: Orbit rotation?
  */
