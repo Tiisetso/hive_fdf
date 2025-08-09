@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/08 15:30:40 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/09 13:00:58 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,16 +110,12 @@ t_coord *parse(char *line, int y, int *x_count)
 	return (coords);
 }
 
-void line_low(int x0, int y0, int x1, int y1)
+void line_low(t_coord start, t_coord end, int dy, int dx)
 {
-	int dx;
-	int dy;
 	int yi;
 	int d;
 	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
 
-	dx = x1 - x0;
-	dy = y1 - y0;
 	yi = 1;
 	if (dy < 0)
 	{
@@ -127,56 +123,46 @@ void line_low(int x0, int y0, int x1, int y1)
 		dy = -dy;
 	}
 	d = (2 * dy) - dx;
-	while (x0 <= x1)
+	while (start.u <= end.u)
 	{
-		mlx_put_pixel(image, x0, y0, color);
+		mlx_put_pixel(image, start.u, start.v, color);
 		if (d > 0)
 		{
-			y0 = y0 + yi;
+			start.v = start.v + yi;
 			d = d + (2 *(dy - dx));
 		}
 		else
 			d = d + (2*dy);
-		x0++;
+		(start.u)++;
 	}
 }
 
-void line_high(int x0, int y0, int x1, int y1)
+void line_high(t_coord start, t_coord end, int dy, int dx)
 {
-	int dx;
-	int dy;
 	int xi;
 	int d;
-	int y;
-	int x;
+	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
 
-	dx = x1 - x0;
-	dy = y1 - y0;
 	xi = 1;
-
 	if(dx < 0)
 	{
 		xi = -1;
 		dx = -dx;
 	}
 	d = (2 * dx) - dy;
-	x = x0;
-	
-	y = y0;
-	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
-	while (y <= y1)
+	while (start.v <= end.v)
 	{
-		mlx_put_pixel(image, x, y, color);
+		mlx_put_pixel(image, start.u, start.v, color);
 		if (d > 0)
 		{
-			x = x + xi;
+			start.u = start.u + xi;
 			d = d + (2 *(dx - dy));
 		}
 		else
 		{
 			d = d + (2*dx);
 		}
-		y++;
+		(start.v)++;
 	}
 }
 
@@ -190,16 +176,16 @@ void bresenham(t_coord start, t_coord end)
 	if (dy < dx)
 	{
 		if (start.u > end.u)
-			line_low(end.u, end.v, start.u, start.v);
+			line_low(end, start, (start.v - end.v), (start.u - end.u));
 		else
-			line_low(start.u, start.v, end.u, end.v);
+			line_low(start, end, (end.v - start.v), (end.u - start.u));
 	}
 	else
 	{
 		if (start.v > end.v)
-			line_high(end.u, end.v, start.u, start.v);
+			line_high(end, start, (start.v - end.v), (start.u - end.u));
 		else
-			line_high(start.u, start.v, end.u, end.v);
+			line_high(start, end, (end.v - start.v), (end.u - start.u));
 	}
 }
 
@@ -245,7 +231,6 @@ void ft_grid(t_coord **m, int max_x, int max_y)
 			m[y][x].u = iso_u((alpha), m[y][x].x*gap, m[y][x].y*gap, m[y][x].z*(gap)) + x_offset;
 			m[y][x].v = iso_v((alpha), m[y][x].x*gap, m[y][x].y*gap, m[y][x].z*(gap)) + y_offset;
 			mlx_put_pixel(image, m[y][x].u, m[y][x].v, color);
-			
 			x++;
 		}
 		y++;
