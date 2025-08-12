@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 12:56:35 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/02 13:16:24 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/12 13:32:15 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,22 @@ typedef struct s_coord {
 	int z;
 	int u;
 	int v;
-	int32_t rgba;
+	uint32_t rgba;
 } t_coord;
+
+typedef struct s_projection {
+	mlx_t *mlx;
+	mlx_image_t *image;
+	t_coord	**matrix;
+	int x_max;
+	int y_max;
+	int gap;
+	int alpha;
+	int x_offset;
+	int y_offset;
+	int redraw;
+} t_projection;
+
+void render(t_projection *projection);
 
 #endif

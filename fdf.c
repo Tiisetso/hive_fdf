@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/09 13:00:58 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/12 13:45:46 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,17 @@
 #define WIDTH 1920
 #define HEIGHT 1920
 
-static mlx_image_t* image;
+static mlx_image_t* image; //Global?
 
-int32_t ft_pixel(int32_t r, int32_t g, int32_t b, int32_t a)
+int32_t ft_pixel(int32_t r, int32_t g, int32_t b, int32_t projection)
 {
-    return (r << 24 | g << 16 | b << 8 | a);
+    return (r << 24 | g << 16 | b << 8 | projection);
+}
+
+void put_pixel_safe(mlx_image_t *img, int x, int y, uint32_t rgba)
+{
+    if ((uint32_t)x < img->width && (uint32_t)y < img->height)
+        mlx_put_pixel(img, x, y, rgba);
 }
 
 double rad(int deg)
@@ -32,7 +38,6 @@ int iso_u(int alpha, double x, double y, double z)
 	x = x * cos(rad(alpha));
 	y = y * cos(rad(alpha + 120));
 	z = z * cos(rad(alpha - 120));
-
 	return ((int)round(x + y + z));
 }
 
@@ -41,49 +46,60 @@ int iso_v(int alpha, double x, double y, double z)
 	x = x * sin(rad(alpha));
 	y = y * sin(rad(alpha + 120));
 	z = z * sin(rad(alpha - 120));
-
 	return ((int)round(x + y + z));
 }
 
-void ft_hook(void* param)
+void ft_hook(void *param)
 {
-	mlx_t* mlx = param;
+    t_projection	*projection;
+    mlx_t			*mlx;
 
-	if (mlx_is_key_down(mlx, MLX_KEY_ESCAPE))
+	projection = param;
+	mlx = projection->mlx;
+    if (mlx_is_key_down(mlx, MLX_KEY_ESCAPE))
 		mlx_close_window(mlx);
-	if (mlx_is_key_down(mlx, MLX_KEY_UP))
-		image->instances[0].y -= 5;
-	if (mlx_is_key_down(mlx, MLX_KEY_DOWN))
-		image->instances[0].y += 5;
-	if (mlx_is_key_down(mlx, MLX_KEY_LEFT))
-		image->instances[0].x -= 5;
-	if (mlx_is_key_down(mlx, MLX_KEY_RIGHT))
-		image->instances[0].x += 5;
+	else
+	{	
+		if (mlx_is_key_down(mlx, MLX_KEY_UP))
+			projection->y_offset -= 5;
+		if (mlx_is_key_down(mlx, MLX_KEY_DOWN))
+			projection->y_offset += 5;
+		if (mlx_is_key_down(mlx, MLX_KEY_LEFT))
+			projection->x_offset -= 5;
+		if (mlx_is_key_down(mlx, MLX_KEY_RIGHT))
+			projection->x_offset += 5;
+		projection->redraw = 1;
+	}
+	if (projection->redraw)
+	{
+		render(projection);
+		projection->redraw = 0;
+	}
 }
 
-int check_file(const char *filename, const char *extension)
+int check_file(const char *filename, const char *ext)
 {
-	const char *dot;
-	int ext_length;
+	const char	*dot;
+	int			ext_len;
 
 	dot = ft_strrchr(filename, '.');
-	ext_length = ft_strlen(extension);
-	if (!dot || dot == filename)
+	ext_len = ft_strlen(ext);
+	if ((!dot || dot == filename))
 		return (0);
 	else
-		return (ft_strncmp(dot, extension, ext_length) == 0);
+		return ((ft_strncmp(dot, ext, ext_len) == 0) && dot[ext_len] == '\0');
 }
+
 t_coord *parse(char *line, int y, int *x_count)
 {
 	int		x;
-	int		z;
-	int32_t	rgba;
 	char	**points;
 	char	**colour_data;
 	t_coord	*coords;
 
-	rgba = 0xFFFFBB;
-	points = ft_split(line, ' '); //TODO: check for failure
+	points = ft_split(line, ' ');
+	if (!points)
+		return (NULL);
 	x = 0;
 	*x_count = 0;
 	while (points[x++])
@@ -95,18 +111,15 @@ t_coord *parse(char *line, int y, int *x_count)
 		if(ft_strchr(points[x], ','))
 		{
 			colour_data = ft_split(points[x], ',');
-			z = ft_atoi(colour_data[0]);
-			rgba = 0xFFFFFF; //TODO: Handle long for int32;
+			coords[x].z = ft_atoi(colour_data[0]);
 		}
 		else
-			z = ft_atoi(points[x]);
+			coords[x].z = ft_atoi(points[x]);
 		coords[x].x = x;
 		coords[x].y = y;
-		coords[x].z = z;
-		coords[x].rgba = rgba;
+		coords[x].rgba = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
 		x++;
 	}
-	//TODO: free points array.
 	return (coords);
 }
 
@@ -114,8 +127,9 @@ void line_low(t_coord start, t_coord end, int dy, int dx)
 {
 	int yi;
 	int d;
-	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
-
+	uint32_t color;
+	
+	color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
 	yi = 1;
 	if (dy < 0)
 	{
@@ -125,7 +139,7 @@ void line_low(t_coord start, t_coord end, int dy, int dx)
 	d = (2 * dy) - dx;
 	while (start.u <= end.u)
 	{
-		mlx_put_pixel(image, start.u, start.v, color);
+		put_pixel_safe(image, start.u, start.v, color);
 		if (d > 0)
 		{
 			start.v = start.v + yi;
@@ -139,10 +153,11 @@ void line_low(t_coord start, t_coord end, int dy, int dx)
 
 void line_high(t_coord start, t_coord end, int dy, int dx)
 {
-	int xi;
-	int d;
-	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
-
+	int			xi;
+	int			d;
+	uint32_t	color;
+	
+	color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
 	xi = 1;
 	if(dx < 0)
 	{
@@ -152,16 +167,14 @@ void line_high(t_coord start, t_coord end, int dy, int dx)
 	d = (2 * dx) - dy;
 	while (start.v <= end.v)
 	{
-		mlx_put_pixel(image, start.u, start.v, color);
+		put_pixel_safe(image, start.u, start.v, color);
 		if (d > 0)
 		{
 			start.u = start.u + xi;
 			d = d + (2 *(dx - dy));
 		}
 		else
-		{
 			d = d + (2*dx);
-		}
 		(start.v)++;
 	}
 }
@@ -189,6 +202,28 @@ void bresenham(t_coord start, t_coord end)
 	}
 }
 
+void on_scroll(double dx, double dy, void *param) {
+    t_projection *projection; 
+    int new_gap;
+	
+	(void)dx;
+	projection = param;
+	new_gap = projection->gap + (int)dy;
+    if (new_gap < 1)
+		new_gap = 1;
+    if (new_gap > 100)
+		new_gap = 100;
+    if (new_gap != projection->gap)
+	{
+		projection->gap = new_gap;
+		projection->redraw = 1;
+	}
+}
+
+void clear_image(mlx_image_t *img) {
+    ft_memset(img->pixels, 0, img->width * img->height * 4);
+}
+
 void ft_draw_line(t_coord **m, int max_x, int max_y)
 {
 	int x;
@@ -210,31 +245,29 @@ void ft_draw_line(t_coord **m, int max_x, int max_y)
 	}
 }
 
-void ft_grid(t_coord **m, int max_x, int max_y)
+void render(t_projection *p)
 {
-	int x;
-	int y;
-	int gap;
-	int alpha;
-	uint32_t color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
-	int x_offset = WIDTH / 2;
-	int y_offset = HEIGHT / 2;
-	
+	int		x;
+	int		y;
+	t_coord	*c;
+
+    clear_image(p->image);
 	y = 0;
-	gap = 15;
-	alpha = 30;
-	while (y < max_y)
+	while (y < p->y_max)
 	{
 		x = 0;
-		while (x < max_x)
+		while (x < p->x_max)
 		{
-			m[y][x].u = iso_u((alpha), m[y][x].x*gap, m[y][x].y*gap, m[y][x].z*(gap)) + x_offset;
-			m[y][x].v = iso_v((alpha), m[y][x].x*gap, m[y][x].y*gap, m[y][x].z*(gap)) + y_offset;
-			mlx_put_pixel(image, m[y][x].u, m[y][x].v, color);
+            c = &p->matrix[y][x];
+            c->u = iso_u(p->alpha, c->x * p->gap, c->y * p->gap, \
+				c->z * p->gap) + p->x_offset;
+            c->v = iso_v(p->alpha, c->x * p->gap, c->y * p->gap, \
+				c->z * p->gap) + p->y_offset;
 			x++;
-		}
+        }
 		y++;
-	}
+    }
+	ft_draw_line(p->matrix, p->x_max, p->y_max);
 }
 
 int32_t main(int ac, char **av)
@@ -251,6 +284,8 @@ int32_t main(int ac, char **av)
 	int y;
 	int i;
 	int cap;
+
+	t_projection projection;
 
 	x_max = 0;
 	y_max = 0;
@@ -274,6 +309,8 @@ int32_t main(int ac, char **av)
 			{
 				x = 0;
 				matrix[y] = parse(line, y, &x);
+				if(matrix[y] == NULL)
+					return (EXIT_FAILURE);
 				y++;
 				if(x > x_max)
 					x_max = x;
@@ -300,6 +337,16 @@ int32_t main(int ac, char **av)
 			return (EXIT_FAILURE);
 	}
 
+	projection.mlx = NULL;
+	projection.image = NULL;
+	projection.matrix = matrix;
+	projection.x_max = x_max;
+	projection.y_max = y_max;
+	projection.gap = 10;
+	projection.alpha = 30;
+	projection.x_offset = WIDTH/2;
+	projection.y_offset = HEIGHT/2;
+
 	if (!(mlx = mlx_init(WIDTH, HEIGHT, "FDF", true)))
 	{
 		puts(mlx_strerror(mlx_errno));
@@ -318,30 +365,21 @@ int32_t main(int ac, char **av)
 		return(EXIT_FAILURE);
 	}
 
-	ft_grid(matrix, x_max, y_max);
-	ft_draw_line(matrix, x_max, y_max);
-
-
-	mlx_loop_hook(mlx, ft_hook, mlx);
+	projection.mlx = mlx;
+	projection.image = image;
+	mlx_scroll_hook(mlx, on_scroll, &projection);
+	mlx_loop_hook(mlx, ft_hook, &projection);
 	mlx_loop(mlx);
 	mlx_terminate(mlx);
 	return (EXIT_SUCCESS);
 }
 
 /* 
+TODO: Clip functions.
+
 TODO: Leaks, leaks, leaks. Correctly free.
 
-TODO: Image size to include all points. Drawing off to the left?
-
-TODO: what about .fdfxxxx?
-
-TODO: colour?
-TODO: Colour transition
-TODO: atoi/atol?
-
-TODO: zoom on scroll.
-
+TODO: initial zoom level(gap), offsets.
+TODO: puts?
 TODO: Norminette.
-
-TODO: Orbit rotation?
  */
