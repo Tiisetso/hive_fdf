@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/12 13:45:46 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/13 13:16:46 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #define WIDTH 1920
 #define HEIGHT 1920
 
-static mlx_image_t* image; //Global?
+static mlx_image_t* image; //TODO: Global?
 
 int32_t ft_pixel(int32_t r, int32_t g, int32_t b, int32_t projection)
 {
@@ -85,9 +85,9 @@ int check_file(const char *filename, const char *ext)
 	dot = ft_strrchr(filename, '.');
 	ext_len = ft_strlen(ext);
 	if ((!dot || dot == filename))
-		return (0);
+		return (EXIT_FAILURE);
 	else
-		return ((ft_strncmp(dot, ext, ext_len) == 0) && dot[ext_len] == '\0');
+		return (!((ft_strncmp(dot, ext, ext_len) == 0) && dot[ext_len] == '\0'));
 }
 
 t_coord *parse(char *line, int y, int *x_count)
@@ -105,6 +105,8 @@ t_coord *parse(char *line, int y, int *x_count)
 	while (points[x++])
 		(*x_count)++;
 	coords = (t_coord *)malloc(sizeof(t_coord) * x);
+	if (!coords)
+		return (NULL);
 	x = 0;
 	while (x < *x_count)
 	{
@@ -202,7 +204,8 @@ void bresenham(t_coord start, t_coord end)
 	}
 }
 
-void on_scroll(double dx, double dy, void *param) {
+void on_scroll(double dx, double dy, void *param)
+{
     t_projection *projection; 
     int new_gap;
 	
@@ -220,8 +223,9 @@ void on_scroll(double dx, double dy, void *param) {
 	}
 }
 
-void clear_image(mlx_image_t *img) {
-    ft_memset(img->pixels, 0, img->width * img->height * 4);
+void clear_image(mlx_image_t *img)
+{
+    ft_memset(img->pixels, 0, (img->width * img->height * 4));
 }
 
 void ft_draw_line(t_coord **m, int max_x, int max_y)
@@ -245,13 +249,12 @@ void ft_draw_line(t_coord **m, int max_x, int max_y)
 	}
 }
 
-void render(t_projection *p)
+void isometric(t_projection *p)
 {
 	int		x;
 	int		y;
 	t_coord	*c;
 
-    clear_image(p->image);
 	y = 0;
 	while (y < p->y_max)
 	{
@@ -267,110 +270,119 @@ void render(t_projection *p)
         }
 		y++;
     }
+}
+
+void render(t_projection *p)
+{
+    clear_image(p->image);
+	isometric(p);
 	ft_draw_line(p->matrix, p->x_max, p->y_max);
 }
 
-int32_t main(int ac, char **av)
+void init_projection(t_projection *p)
 {
-	mlx_t* mlx;
-	char	*line;
-	int 	fd;
-	t_coord **matrix;
-	t_coord **temp;
+	p->x_max = 0;
+	p->y_max = 0;
+	p->mlx = NULL;
+	p->image = NULL;
+	p->alpha = 30;
+}
 
-	int	x_max;
-	int y_max;
+int load_matrix(t_projection *projection, char *file)
+{
+	int		fd;
+	t_coord **temp;
 	int x;
 	int y;
 	int i;
 	int cap;
+	char	*line;
 
-	t_projection projection;
-
-	x_max = 0;
-	y_max = 0;
 	x = 0;
 	y = 0;
+	fd = open(file, O_RDONLY);
+	if(fd == -1)
+	{
+		ft_printf("File: %s not found.", file);
+		return (EXIT_FAILURE);
+	}
+	projection->matrix = (t_coord **)malloc(sizeof(t_coord *));
+	cap = 1;
+	while ((line = get_next_line(fd)))
+	{
+		x = 0;
+		projection->matrix[y] = parse(line, y, &x);
+		if(projection->matrix[y] == NULL)
+			return (EXIT_FAILURE);
+		y++;
+		if(x > projection->x_max)
+			projection->x_max = x;
+		if (y >= cap)
+		{
+			temp = (t_coord **)malloc(sizeof(t_coord *) * ++cap);
+			if(!temp)
+				return (0);
+			i = 0;
+			while (i < y)
+			{
+				temp[i] = projection->matrix[i];
+				i++;
+			}
+			free(projection->matrix);
+			projection->matrix = temp;
+		}
+		// ft_printf("%s", line); //TODO: Remove
+		free(line);
+	}
+	close(fd);
+	projection->y_max = y;
+	return (EXIT_SUCCESS);
+}
+
+int init_mlx(t_projection *p)
+{
+	if (!(p->mlx = mlx_init(WIDTH, HEIGHT, "FDF", true)))
+	{
+		// puts(mlx_strerror(mlx_errno));
+		return (EXIT_FAILURE);
+	}
+	if (!(image = mlx_new_image(p->mlx, WIDTH, HEIGHT)))
+	{
+		mlx_close_window(p->mlx);
+		// puts(mlx_strerror(mlx_errno));
+		return (EXIT_FAILURE);
+	}
+	if (mlx_image_to_window(p->mlx, image, 0, 0) == -1)
+	{
+		mlx_close_window(p->mlx);
+		// puts(mlx_strerror(mlx_errno));
+		return (EXIT_FAILURE);
+	}
+	return (EXIT_SUCCESS);
+}
+
+int32_t main(int ac, char **av)
+{
+	t_projection	projection;
+	
+	init_projection(&projection);
 	if (ac != 2)
 		return (EXIT_FAILURE);
 	else
 	{
-		if (check_file(av[1], ".fdf"))
-		{
-			fd = open(av[1], O_RDONLY);
-			if(fd == -1)
-			{
-				ft_printf("File: %s not found.", av[1]);
-				return (EXIT_FAILURE);
-			}
-			matrix = (t_coord **)malloc(sizeof(t_coord *));
-			cap = 1;
-			while ((line = get_next_line(fd)))
-			{
-				x = 0;
-				matrix[y] = parse(line, y, &x);
-				if(matrix[y] == NULL)
-					return (EXIT_FAILURE);
-				y++;
-				if(x > x_max)
-					x_max = x;
-				if (y >= cap)
-				{
-					temp = (t_coord **)malloc(sizeof(t_coord *) * ++cap);
-					if(!temp)
-						return (EXIT_FAILURE);
-					i = 0;
-					while (i < y)
-					{
-						temp[i] = matrix[i];
-						i++;
-					}
-					free(matrix);
-					matrix = temp;
-				}
-				// ft_printf("%s", line); //TODO: Remove
-				free(line);
-			}
-			y_max = y;
-		}
-		else
+		if (((check_file(av[1], ".fdf")) || (load_matrix(&projection, av[1]))))
 			return (EXIT_FAILURE);
 	}
-
-	projection.mlx = NULL;
-	projection.image = NULL;
-	projection.matrix = matrix;
-	projection.x_max = x_max;
-	projection.y_max = y_max;
-	projection.gap = 10;
-	projection.alpha = 30;
-	projection.x_offset = WIDTH/2;
+	projection.gap = (int)round(HEIGHT/projection.x_max/2) ;
 	projection.y_offset = HEIGHT/2;
-
-	if (!(mlx = mlx_init(WIDTH, HEIGHT, "FDF", true)))
-	{
-		puts(mlx_strerror(mlx_errno));
-		return(EXIT_FAILURE);
-	}
-	if (!(image = mlx_new_image(mlx, WIDTH, HEIGHT)))
-	{
-		mlx_close_window(mlx);
-		puts(mlx_strerror(mlx_errno));
-		return(EXIT_FAILURE);
-	}
-	if (mlx_image_to_window(mlx, image, 0, 0) == -1)
-	{
-		mlx_close_window(mlx);
-		puts(mlx_strerror(mlx_errno));
-		return(EXIT_FAILURE);
-	}
-
-	projection.mlx = mlx;
-	projection.image = image;
-	mlx_scroll_hook(mlx, on_scroll, &projection);
-	mlx_loop_hook(mlx, ft_hook, &projection);
-	mlx_loop(mlx);
-	mlx_terminate(mlx);
+	projection.x_offset = WIDTH/2;
+	if(init_mlx(&projection))
+		return (EXIT_FAILURE);
+	projection.image = image; //TODO: use instead of global.
+	mlx_scroll_hook(projection.mlx, on_scroll, &projection);
+	mlx_loop_hook(projection.mlx, ft_hook, &projection);
+	mlx_loop(projection.mlx);
+	mlx_terminate(projection.mlx);
 	return (EXIT_SUCCESS);
 }
 
@@ -379,7 +391,18 @@ TODO: Clip functions.
 
 TODO: Leaks, leaks, leaks. Correctly free.
 
+TODO: process the u,v's intitially.
+
+TODO: line low+high, passed image.
+
+TODO:get min of the max x's or reject map.
+
+TODO: max & min int? 
+TODO: empty map?
+
 TODO: initial zoom level(gap), offsets.
 TODO: puts?
+
+TODO: Check return values
 TODO: Norminette.
  */
