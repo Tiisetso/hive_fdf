@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/13 16:34:37 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/13 17:07:15 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -296,10 +296,17 @@ t_coord *parse(char *line, int y, int *x_count)
 	int		x;
 	char	**points;
 	t_coord	*coords;
+	char	*trimmed_line;
 
-	points = ft_split(ft_strtrim(line, " \n\t\v\r\f"), ' ');
-	if (!points)
+	trimmed_line = ft_strtrim(line, " \n\t\v\r\f");
+	if(!trimmed_line)
 		return (NULL);
+	points = ft_split(trimmed_line, ' ');
+	if (!points)
+	{
+		free(trimmed_line);
+		return (NULL);
+	}
 	*x_count = count_points(points);
 	coords = (t_coord *)malloc(sizeof(t_coord) * (*x_count));
 	if (!coords)
@@ -310,6 +317,7 @@ t_coord *parse(char *line, int y, int *x_count)
 		init_coord(&coords[x], points, x, y);
 		x++;
 	}
+	free(trimmed_line);
 	free_split(points);
 	return (coords);
 }
@@ -340,7 +348,11 @@ int load_matrix(t_projection *projection, char *file)
 		x = 0;
 		projection->matrix[y] = parse(line, y, &x);
 		if(projection->matrix[y] == NULL)
+		{
+			free(line);
+			close(fd);
 			return (EXIT_FAILURE);
+		}
 		y++;
 		if(x > projection->x_max)
 			projection->x_max = x;
@@ -348,7 +360,11 @@ int load_matrix(t_projection *projection, char *file)
 		{
 			temp = (t_coord **)malloc(sizeof(t_coord *) * ++cap);
 			if(!temp)
+			{
+				free(line);
+				close(fd);
 				return (0);
+			}
 			i = 0;
 			while (i < y)
 			{
@@ -409,6 +425,8 @@ int32_t main(int ac, char **av)
 	mlx_scroll_hook(projection.mlx, on_scroll, &projection);
 	mlx_loop_hook(projection.mlx, ft_hook, &projection);
 	mlx_loop(projection.mlx);
+
+	ft_printf("this ran\n");
 	mlx_terminate(projection.mlx);
 	return (EXIT_SUCCESS);
 }
