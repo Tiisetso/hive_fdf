@@ -6,14 +6,11 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/13 16:22:35 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/13 16:34:37 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fdf.h"
-
-#define WIDTH 1920
-#define HEIGHT 1920
 
 static mlx_image_t* image; //TODO: Global?
 
@@ -251,6 +248,8 @@ void init_projection(t_projection *p)
 	p->mlx = NULL;
 	p->image = NULL;
 	p->alpha = 30;
+	p->height = 1920;
+	p->width = 1920;
 }
 
 int count_points(char **points)
@@ -263,6 +262,18 @@ int count_points(char **points)
 	return (i);
 }
 
+void free_split(char **array)
+{
+	int i;
+
+	i = 0;
+	if(!array)
+		return ;
+	while(array[i])
+		free(array[i++]);
+	free(array);
+}
+
 void init_coord(t_coord *coord, char **points, int x, int y)
 {
 	char	**colour_data;
@@ -271,7 +282,7 @@ void init_coord(t_coord *coord, char **points, int x, int y)
 	{
 		colour_data = ft_split(points[x], ',');
 		coord->z = ft_atoi(colour_data[0]);
-		free(colour_data); //TODO: fix!
+		free_split(colour_data);
 	}
 	else
 		coord->z = ft_atoi(points[x]);
@@ -285,11 +296,8 @@ t_coord *parse(char *line, int y, int *x_count)
 	int		x;
 	char	**points;
 	t_coord	*coords;
-	char	*trimmed_line;
 
-	trimmed_line = ft_strtrim(line, " \n\t\v\r\f");
-	points = ft_split(trimmed_line, ' ');
-	free(trimmed_line);
+	points = ft_split(ft_strtrim(line, " \n\t\v\r\f"), ' ');
 	if (!points)
 		return (NULL);
 	*x_count = count_points(points);
@@ -302,7 +310,7 @@ t_coord *parse(char *line, int y, int *x_count)
 		init_coord(&coords[x], points, x, y);
 		x++;
 	}
-	free(points);
+	free_split(points);
 	return (coords);
 }
 
@@ -360,12 +368,12 @@ int load_matrix(t_projection *projection, char *file)
 
 int init_mlx(t_projection *p)
 {
-	if (!(p->mlx = mlx_init(WIDTH, HEIGHT, "FDF", true)))
+	if (!(p->mlx = mlx_init(p->width, p->height, "FDF", true)))
 	{
 		// puts(mlx_strerror(mlx_errno));
 		return (EXIT_FAILURE);
 	}
-	if (!(image = mlx_new_image(p->mlx, WIDTH, HEIGHT)))
+	if (!(image = mlx_new_image(p->mlx, p->width, p->height)))
 	{
 		mlx_close_window(p->mlx);
 		// puts(mlx_strerror(mlx_errno));
@@ -392,9 +400,9 @@ int32_t main(int ac, char **av)
 		if (((check_file(av[1], ".fdf")) || (load_matrix(&projection, av[1]))))
 			return (EXIT_FAILURE);
 	}
-	projection.gap = (int)round(HEIGHT/projection.x_max/2) ;
-	projection.y_offset = HEIGHT/2;
-	projection.x_offset = WIDTH/2;
+	projection.gap = (int)round(projection.height/projection.x_max/2) ;
+	projection.y_offset = projection.height/2;
+	projection.x_offset = projection.width/2;
 	if(init_mlx(&projection))
 		return (EXIT_FAILURE);
 	projection.image = image; //TODO: use instead of global.

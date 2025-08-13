@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 12:56:35 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/12 13:32:15 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/13 16:32:55 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,8 @@ typedef struct s_projection {
 	int x_offset;
 	int y_offset;
 	int redraw;
+	int height;
+	int width;
 } t_projection;
 
 void render(t_projection *projection);
