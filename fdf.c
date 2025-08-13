@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/13 13:16:46 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/13 16:22:35 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,41 +88,6 @@ int check_file(const char *filename, const char *ext)
 		return (EXIT_FAILURE);
 	else
 		return (!((ft_strncmp(dot, ext, ext_len) == 0) && dot[ext_len] == '\0'));
-}
-
-t_coord *parse(char *line, int y, int *x_count)
-{
-	int		x;
-	char	**points;
-	char	**colour_data;
-	t_coord	*coords;
-
-	points = ft_split(line, ' ');
-	if (!points)
-		return (NULL);
-	x = 0;
-	*x_count = 0;
-	while (points[x++])
-		(*x_count)++;
-	coords = (t_coord *)malloc(sizeof(t_coord) * x);
-	if (!coords)
-		return (NULL);
-	x = 0;
-	while (x < *x_count)
-	{
-		if(ft_strchr(points[x], ','))
-		{
-			colour_data = ft_split(points[x], ',');
-			coords[x].z = ft_atoi(colour_data[0]);
-		}
-		else
-			coords[x].z = ft_atoi(points[x]);
-		coords[x].x = x;
-		coords[x].y = y;
-		coords[x].rgba = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
-		x++;
-	}
-	return (coords);
 }
 
 void line_low(t_coord start, t_coord end, int dy, int dx)
@@ -288,9 +253,63 @@ void init_projection(t_projection *p)
 	p->alpha = 30;
 }
 
+int count_points(char **points)
+{
+	int i;
+
+	i = 0;
+	while(points[i])
+		i++;
+	return (i);
+}
+
+void init_coord(t_coord *coord, char **points, int x, int y)
+{
+	char	**colour_data;
+
+	if(ft_strchr(points[x], ','))
+	{
+		colour_data = ft_split(points[x], ',');
+		coord->z = ft_atoi(colour_data[0]);
+		free(colour_data); //TODO: fix!
+	}
+	else
+		coord->z = ft_atoi(points[x]);
+	coord->x = x;
+	coord->y = y;
+	coord->rgba = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
+}
+
+t_coord *parse(char *line, int y, int *x_count)
+{
+	int		x;
+	char	**points;
+	t_coord	*coords;
+	char	*trimmed_line;
+
+	trimmed_line = ft_strtrim(line, " \n\t\v\r\f");
+	points = ft_split(trimmed_line, ' ');
+	free(trimmed_line);
+	if (!points)
+		return (NULL);
+	*x_count = count_points(points);
+	coords = (t_coord *)malloc(sizeof(t_coord) * (*x_count));
+	if (!coords)
+		return (NULL);
+	x = 0;
+	while (x < *x_count)
+	{
+		init_coord(&coords[x], points, x, y);
+		x++;
+	}
+	free(points);
+	return (coords);
+}
+
 int load_matrix(t_projection *projection, char *file)
 {
 	int		fd;
+	
 	t_coord **temp;
 	int x;
 	int y;
@@ -328,7 +347,7 @@ int load_matrix(t_projection *projection, char *file)
 				temp[i] = projection->matrix[i];
 				i++;
 			}
-			free(projection->matrix);
+			free(projection->matrix); //TODO: improve this.
 			projection->matrix = temp;
 		}
 		// ft_printf("%s", line); //TODO: Remove
@@ -402,6 +421,8 @@ TODO: empty map?
 
 TODO: initial zoom level(gap), offsets.
 TODO: puts?
+
+TODO: libft fixes
 
 TODO: Check return values
 TODO: Norminette.
