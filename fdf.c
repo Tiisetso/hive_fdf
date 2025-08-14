@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/13 17:07:15 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/14 11:27:59 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -291,6 +291,24 @@ void init_coord(t_coord *coord, char **points, int x, int y)
 	coord->rgba = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
 }
 
+void free_matrix(t_projection *p)
+{
+	int y;
+
+	if(!p || (!p->matrix))
+		return ;
+	y = 0;
+	while (y < p->y_max)
+	{
+		free(p->matrix[y]);
+		y++;
+	}
+	free(p->matrix);
+	p->matrix = NULL;
+	p->x_max = 0;
+	p->y_max = 0;
+}
+
 t_coord *parse(char *line, int y, int *x_count)
 {
 	int		x;
@@ -342,44 +360,55 @@ int load_matrix(t_projection *projection, char *file)
 		return (EXIT_FAILURE);
 	}
 	projection->matrix = (t_coord **)malloc(sizeof(t_coord *));
+	if (!projection->matrix)
+	{
+		close(fd);
+		return (EXIT_FAILURE);
+	}
 	cap = 1;
 	while ((line = get_next_line(fd)))
 	{
 		x = 0;
 		projection->matrix[y] = parse(line, y, &x);
+		free(line);
 		if(projection->matrix[y] == NULL)
 		{
-			free(line);
+			projection->y_max = y;
+			free_matrix(projection);
 			close(fd);
 			return (EXIT_FAILURE);
 		}
-		y++;
 		if(x > projection->x_max)
-			projection->x_max = x;
+		projection->x_max = x;
+		
+		y++;
 		if (y >= cap)
 		{
 			temp = (t_coord **)malloc(sizeof(t_coord *) * ++cap);
 			if(!temp)
 			{
-				free(line);
+				projection->y_max = y;
+				free_matrix(projection);
 				close(fd);
-				return (0);
+				return (EXIT_FAILURE);
 			}
+
 			i = 0;
 			while (i < y)
 			{
 				temp[i] = projection->matrix[i];
 				i++;
 			}
-			free(projection->matrix); //TODO: improve this.
+			free(projection->matrix);
 			projection->matrix = temp;
 		}
-		// ft_printf("%s", line); //TODO: Remove
-		free(line);
 	}
 	close(fd);
 	projection->y_max = y;
-	return (EXIT_SUCCESS);
+	if (y > 0)
+		return (EXIT_SUCCESS);
+	else
+		return (EXIT_FAILURE);
 }
 
 int init_mlx(t_projection *p)
@@ -397,6 +426,7 @@ int init_mlx(t_projection *p)
 	}
 	if (mlx_image_to_window(p->mlx, image, 0, 0) == -1)
 	{
+		mlx_delete_image(p->mlx, p->image);
 		mlx_close_window(p->mlx);
 		// puts(mlx_strerror(mlx_errno));
 		return (EXIT_FAILURE);
@@ -406,44 +436,52 @@ int init_mlx(t_projection *p)
 
 int32_t main(int ac, char **av)
 {
-	t_projection	projection;
+	t_projection	p;
 	
-	init_projection(&projection);
+	init_projection(&p);
 	if (ac != 2)
 		return (EXIT_FAILURE);
 	else
 	{
-		if (((check_file(av[1], ".fdf")) || (load_matrix(&projection, av[1]))))
+		if (((check_file(av[1], ".fdf")) || (load_matrix(&p, av[1]))))
 			return (EXIT_FAILURE);
 	}
-	projection.gap = (int)round(projection.height/projection.x_max/2) ;
-	projection.y_offset = projection.height/2;
-	projection.x_offset = projection.width/2;
-	if(init_mlx(&projection))
+	p.gap = (int)round(p.height/p.x_max/2) ;
+	p.y_offset = p.height/2;
+	p.x_offset = p.width/2;
+	if(init_mlx(&p))
+	{
+		free_matrix(&p);
 		return (EXIT_FAILURE);
-	projection.image = image; //TODO: use instead of global.
-	mlx_scroll_hook(projection.mlx, on_scroll, &projection);
-	mlx_loop_hook(projection.mlx, ft_hook, &projection);
-	mlx_loop(projection.mlx);
+	}
+	p.image = image; //TODO: use instead of global.
+	
+	mlx_scroll_hook(p.mlx, on_scroll, &p);
+	mlx_loop_hook(p.mlx, ft_hook, &p);
+	mlx_loop(p.mlx);
 
-	ft_printf("this ran\n");
-	mlx_terminate(projection.mlx);
+	if(p.image)
+		mlx_delete_image(p.mlx, p.image);
+	if(p.mlx)
+		mlx_terminate(p.mlx);
+	free_matrix(&p);
 	return (EXIT_SUCCESS);
 }
 
 /* 
 TODO: Clip functions.
 
+TODO: invalid map check
+TODO:get min of the max x's or reject map.
+TODO: empty map?
+TODO: max & min int? 
+
 TODO: Leaks, leaks, leaks. Correctly free.
 
-TODO: process the u,v's intitially.
+TODO: process the u,v's initially.
 
 TODO: line low+high, passed image.
 
-TODO:get min of the max x's or reject map.
-
-TODO: max & min int? 
-TODO: empty map?
 
 TODO: initial zoom level(gap), offsets.
 TODO: puts?
