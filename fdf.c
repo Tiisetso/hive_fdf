@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/14 13:50:48 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/14 18:09:51 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -307,6 +307,14 @@ void free_matrix(t_projection *p)
 	p->y_max = 0;
 }
 
+int free_matrix_return(t_projection *p, int y, int fd)
+{
+	p->y_max = y;
+	free_matrix(p);
+	close(fd);
+	return (EXIT_FAILURE);
+}
+
 t_coord *parse(char *line, int y, int *x_count)
 {
 	int		x;
@@ -318,11 +326,9 @@ t_coord *parse(char *line, int y, int *x_count)
 	if(!trimmed_line)
 		return (NULL);
 	points = ft_split(trimmed_line, ' ');
+	free(trimmed_line);
 	if (!points)
-	{
-		free(trimmed_line);
 		return (NULL);
-	}
 	*x_count = count_points(points);
 	coords = (t_coord *)malloc(sizeof(t_coord) * (*x_count));
 	if (!coords)
@@ -333,7 +339,6 @@ t_coord *parse(char *line, int y, int *x_count)
 		init_coord(&coords[x], points, x, y);
 		x++;
 	}
-	free(trimmed_line);
 	free_split(points);
 	return (coords);
 }
@@ -342,27 +347,24 @@ int load_matrix(t_projection *projection, char *file)
 {
 	int		fd;
 	
-	t_coord **temp;
+	char	*line;
 	int x;
 	int y;
-	int i;
 	int cap;
-	char	*line;
-
-	x = 0;
-	y = 0;
+	
+	t_coord **temp;
+	int i;
+	
 	fd = open(file, O_RDONLY);
 	if(fd == -1)
-	{
-		ft_printf("File: %s not found.", file);
 		return (EXIT_FAILURE);
-	}
 	projection->matrix = (t_coord **)malloc(sizeof(t_coord *));
 	if (!projection->matrix)
 	{
 		close(fd);
 		return (EXIT_FAILURE);
 	}
+	y = 0;
 	cap = 1;
 	while ((line = get_next_line(fd)))
 	{
@@ -370,27 +372,15 @@ int load_matrix(t_projection *projection, char *file)
 		projection->matrix[y] = parse(line, y, &x);
 		free(line);
 		if(projection->matrix[y] == NULL)
-		{
-			projection->y_max = y;
-			free_matrix(projection);
-			close(fd);
-			return (EXIT_FAILURE);
-		}
+			return (free_matrix_return(projection, y, fd));
 		if(x > projection->x_max)
-		projection->x_max = x;
-		
+			projection->x_max = x;
 		y++;
 		if (y >= cap)
 		{
 			temp = (t_coord **)malloc(sizeof(t_coord *) * ++cap);
 			if(!temp)
-			{
-				projection->y_max = y;
-				free_matrix(projection);
-				close(fd);
-				return (EXIT_FAILURE);
-			}
-
+				return (free_matrix_return(projection, y, fd));
 			i = 0;
 			while (i < y)
 			{
@@ -468,22 +458,22 @@ int32_t main(int ac, char **av)
 }
 
 /* 
+Load map into array of lines. Check and reject. Get x, and y. 
+
 TODO: Clip functions.
+TODO: Leaks, leaks, leaks. Correctly free.
+
+TODO: line low+high, passed image. to many var at the moment.
 
 TODO: invalid map check
-TODO:get min of the max x's or reject map.
+TODO: get one valid x to read for line.
 TODO: empty map?
 TODO: max & min int? 
-
-TODO: Leaks, leaks, leaks. Correctly free.
 
 
 TODO: draw line safely
 
-
 TODO: process the u,v's initially.
-
-TODO: line low+high, passed image.
 
 TODO: initial zoom level(gap), offsets.
 TODO: puts?
