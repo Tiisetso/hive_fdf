@@ -6,13 +6,11 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/14 11:27:59 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/14 13:50:48 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fdf.h"
-
-static mlx_image_t* image; //TODO: Global?
 
 int32_t ft_pixel(int32_t r, int32_t g, int32_t b, int32_t projection)
 {
@@ -87,7 +85,7 @@ int check_file(const char *filename, const char *ext)
 		return (!((ft_strncmp(dot, ext, ext_len) == 0) && dot[ext_len] == '\0'));
 }
 
-void line_low(t_coord start, t_coord end, int dy, int dx)
+void line_low(mlx_image_t *img, t_coord start, t_coord end, int dy, int dx)
 {
 	int yi;
 	int d;
@@ -103,7 +101,7 @@ void line_low(t_coord start, t_coord end, int dy, int dx)
 	d = (2 * dy) - dx;
 	while (start.u <= end.u)
 	{
-		put_pixel_safe(image, start.u, start.v, color);
+		put_pixel_safe(img, start.u, start.v, color);
 		if (d > 0)
 		{
 			start.v = start.v + yi;
@@ -115,7 +113,7 @@ void line_low(t_coord start, t_coord end, int dy, int dx)
 	}
 }
 
-void line_high(t_coord start, t_coord end, int dy, int dx)
+void line_high(mlx_image_t *img, t_coord start, t_coord end, int dy, int dx)
 {
 	int			xi;
 	int			d;
@@ -131,7 +129,7 @@ void line_high(t_coord start, t_coord end, int dy, int dx)
 	d = (2 * dx) - dy;
 	while (start.v <= end.v)
 	{
-		put_pixel_safe(image, start.u, start.v, color);
+		put_pixel_safe(img, start.u, start.v, color);
 		if (d > 0)
 		{
 			start.u = start.u + xi;
@@ -143,7 +141,7 @@ void line_high(t_coord start, t_coord end, int dy, int dx)
 	}
 }
 
-void bresenham(t_coord start, t_coord end)
+void bresenham(mlx_image_t *img, t_coord start, t_coord end)
 {
 	int dy;
 	int dx;
@@ -153,16 +151,16 @@ void bresenham(t_coord start, t_coord end)
 	if (dy < dx)
 	{
 		if (start.u > end.u)
-			line_low(end, start, (start.v - end.v), (start.u - end.u));
+			line_low(img, end, start, (start.v - end.v), (start.u - end.u));
 		else
-			line_low(start, end, (end.v - start.v), (end.u - start.u));
+			line_low(img, start, end, (end.v - start.v), (end.u - start.u));
 	}
 	else
 	{
 		if (start.v > end.v)
-			line_high(end, start, (start.v - end.v), (start.u - end.u));
+			line_high(img, end, start, (start.v - end.v), (start.u - end.u));
 		else
-			line_high(start, end, (end.v - start.v), (end.u - start.u));
+			line_high(img, start, end, (end.v - start.v), (end.u - start.u));
 	}
 }
 
@@ -190,21 +188,21 @@ void clear_image(mlx_image_t *img)
     ft_memset(img->pixels, 0, (img->width * img->height * 4));
 }
 
-void ft_draw_line(t_coord **m, int max_x, int max_y)
+void ft_draw_line(t_projection *p)
 {
 	int x;
 	int y;
 
 	y = 0;
-	while (y < max_y)
+	while (y < p->y_max)
 	{
 		x = 0;
-		while (x < max_x)
+		while (x < p->x_max)
 		{
-			if ((y + 1) < max_y)
-				bresenham(m[y][x], m[y + 1][x]);
-			if ((x + 1) < max_x)
-				bresenham(m[y][x], m[y][x + 1]);
+			if ((y + 1) < p->y_max)
+				bresenham(p->image, p->matrix[y][x], p->matrix[y + 1][x]);
+			if ((x + 1) < p->x_max)
+				bresenham(p->image, p->matrix[y][x], p->matrix[y][x + 1]);
 			x++;
 		}
 		y++;
@@ -238,7 +236,7 @@ void render(t_projection *p)
 {
     clear_image(p->image);
 	isometric(p);
-	ft_draw_line(p->matrix, p->x_max, p->y_max);
+	ft_draw_line(p);
 }
 
 void init_projection(t_projection *p)
@@ -418,13 +416,13 @@ int init_mlx(t_projection *p)
 		// puts(mlx_strerror(mlx_errno));
 		return (EXIT_FAILURE);
 	}
-	if (!(image = mlx_new_image(p->mlx, p->width, p->height)))
+	if (!(p->image = mlx_new_image(p->mlx, p->width, p->height)))
 	{
 		mlx_close_window(p->mlx);
 		// puts(mlx_strerror(mlx_errno));
 		return (EXIT_FAILURE);
 	}
-	if (mlx_image_to_window(p->mlx, image, 0, 0) == -1)
+	if (mlx_image_to_window(p->mlx, p->image, 0, 0) == -1)
 	{
 		mlx_delete_image(p->mlx, p->image);
 		mlx_close_window(p->mlx);
@@ -432,6 +430,12 @@ int init_mlx(t_projection *p)
 		return (EXIT_FAILURE);
 	}
 	return (EXIT_SUCCESS);
+}
+void set_matrix(t_projection *p)
+{
+	p->gap = (int)round(p->height/p->x_max/2) ;
+	p->y_offset = p->height/2;
+	p->x_offset = p->width/2;
 }
 
 int32_t main(int ac, char **av)
@@ -446,20 +450,15 @@ int32_t main(int ac, char **av)
 		if (((check_file(av[1], ".fdf")) || (load_matrix(&p, av[1]))))
 			return (EXIT_FAILURE);
 	}
-	p.gap = (int)round(p.height/p.x_max/2) ;
-	p.y_offset = p.height/2;
-	p.x_offset = p.width/2;
+	set_matrix(&p);
 	if(init_mlx(&p))
 	{
 		free_matrix(&p);
 		return (EXIT_FAILURE);
 	}
-	p.image = image; //TODO: use instead of global.
-	
 	mlx_scroll_hook(p.mlx, on_scroll, &p);
 	mlx_loop_hook(p.mlx, ft_hook, &p);
 	mlx_loop(p.mlx);
-
 	if(p.image)
 		mlx_delete_image(p.mlx, p.image);
 	if(p.mlx)
@@ -478,10 +477,13 @@ TODO: max & min int?
 
 TODO: Leaks, leaks, leaks. Correctly free.
 
+
+TODO: draw line safely
+
+
 TODO: process the u,v's initially.
 
 TODO: line low+high, passed image.
-
 
 TODO: initial zoom level(gap), offsets.
 TODO: puts?
