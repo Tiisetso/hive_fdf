@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/14 18:09:51 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/15 14:11:31 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -272,21 +272,39 @@ void free_split(char **array)
 	free(array);
 }
 
-void init_coord(t_coord *coord, char **points, int x, int y)
+int init_coord(t_coord *coord, char **points, int x, int y)
 {
-	char	**colour_data;
+	char	**coord_data;
+	long	long_num;
 
 	if(ft_strchr(points[x], ','))
 	{
-		colour_data = ft_split(points[x], ',');
-		coord->z = ft_atoi(colour_data[0]);
-		free_split(colour_data);
+		coord_data = ft_split(points[x], ',');
+		long_num = ft_atol(coord_data[0]);
+		if ((long_num > INT_MAX) || (long_num < INT_MIN))
+		{
+			ft_printf("Only integer values accepted.");
+			return (EXIT_FAILURE);
+		}
+		else
+			coord->z = (int)long_num;
+		free_split(coord_data);
 	}
 	else
-		coord->z = ft_atoi(points[x]);
+	{
+		long_num = ft_atol(points[x]);
+		if ((long_num > INT_MAX) || (long_num < INT_MIN))
+		{
+			ft_printf("Only integer values accepted.");
+			return (EXIT_FAILURE);
+		}
+		else
+			coord->z = (int)long_num;
+	}
 	coord->x = x;
 	coord->y = y;
 	coord->rgba = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
+	return (EXIT_SUCCESS);
 }
 
 void free_matrix(t_projection *p)
@@ -342,6 +360,7 @@ t_coord *parse(char *line, int y, int *x_count)
 	free_split(points);
 	return (coords);
 }
+
 
 int load_matrix(t_projection *projection, char *file)
 {
@@ -458,7 +477,7 @@ int32_t main(int ac, char **av)
 }
 
 /* 
-Load map into array of lines. Check and reject. Get x, and y. 
+TODO: error messages
 
 TODO: Clip functions.
 TODO: Leaks, leaks, leaks. Correctly free.

@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 12:56:35 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/14 11:22:10 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/15 13:46:31 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include <math.h>
 # include "libft.h"
 # include <fcntl.h> 
+# include <limits.h>
 
 typedef struct s_coord {
 	int			x;
