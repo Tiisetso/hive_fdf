@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/15 14:11:31 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/15 14:58:49 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -283,7 +283,7 @@ int init_coord(t_coord *coord, char **points, int x, int y)
 		long_num = ft_atol(coord_data[0]);
 		if ((long_num > INT_MAX) || (long_num < INT_MIN))
 		{
-			ft_printf("Only integer values accepted.");
+			ft_printf("Only integer values accepted.\n");
 			return (EXIT_FAILURE);
 		}
 		else
@@ -478,6 +478,7 @@ int32_t main(int ac, char **av)
 
 /* 
 TODO: error messages
+TODO: check file without permissions. Empty. 
 
 TODO: Clip functions.
 TODO: Leaks, leaks, leaks. Correctly free.
@@ -494,7 +495,7 @@ TODO: draw line safely
 
 TODO: process the u,v's initially.
 
-TODO: initial zoom level(gap), offsets.
+TODO: initial zoom level(gap), offsets. not really necessary.
 TODO: puts?
 
 TODO: libft fixes
