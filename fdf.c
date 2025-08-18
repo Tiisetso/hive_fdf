@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/18 16:20:20 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/18 16:29:21 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -386,6 +386,7 @@ int	free_return_parse(char **points, t_coord **matrix, int y)
 		return (EXIT_FAILURE);
 	return (EXIT_SUCCESS);
 }
+// TODO: line error guard
 
 int	parse(t_projection *p, char *line, int y, int x)
 {
@@ -401,7 +402,7 @@ int	parse(t_projection *p, char *line, int y, int x)
 	free(trimmed_line);
 	if (!points)
 		return (EXIT_FAILURE);
-	p->x_max = count_points(points); //TODO: line error guard
+	p->x_max = count_points(points);
 	coords = (t_coord *)malloc(sizeof(t_coord) * (p->x_max));
 	if (!coords)
 		return (free_split_return(points));
@@ -484,7 +485,7 @@ int	init_mlx(t_projection *p)
 	if (!(p->image))
 	{
 		mlx_close_window(p->mlx);
-		mlx_terminate(p->mlx); 
+		mlx_terminate(p->mlx);
 		ft_printf("%s\n", mlx_strerror(mlx_errno));
 		return (EXIT_FAILURE);
 	}
@@ -492,16 +493,17 @@ int	init_mlx(t_projection *p)
 	{
 		mlx_delete_image(p->mlx, p->image);
 		mlx_close_window(p->mlx);
-		mlx_terminate(p->mlx); 
+		mlx_terminate(p->mlx);
 		ft_printf("%s\n", mlx_strerror(mlx_errno));
 		return (EXIT_FAILURE);
 	}
 	return (EXIT_SUCCESS);
 }
+// TODO: should be greater than 0 and postive?
 
 void	set_matrix(t_projection *p)
 {
-	p->gap = (int)round(p->height / p->x_max / 2);
+	p->gap = (int)round(p->height / p->x_max / 3);
 	p->y_offset = p->height / 2;
 	p->x_offset = p->width / 2;
 }
@@ -539,18 +541,11 @@ int32_t	main(int ac, char **av)
 }
 
 /*
-TODO: empty.fdf
-TODO: check file without permissions.
-TODO: invalid map check
-
-TODO: error messages
+TODO: error messages: permissions, path, empty.
 
 TODO: Leaks, leaks, leaks. Correctly free.
 
 TODO: get one valid x to read for line.
-
-
-TODO: process the u,v's initially.
 
 TODO: Check return values
  */
