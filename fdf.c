@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/18 18:01:44 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/18 18:20:30 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -559,11 +559,7 @@ int32_t	main(int ac, char **av)
 TODO: error messages: permissions, path, empty files,
 TODO: irregular lines, empty lines.
 
-TODO: should be greater than 0 and positive?
-
 TODO: Leaks, leaks, leaks. Correctly free.
-
-TODO: get one valid x to read for line.
 
 TODO: Check return values
  */
