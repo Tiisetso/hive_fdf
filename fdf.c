@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/18 15:55:46 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/18 16:20:20 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -401,7 +401,7 @@ int	parse(t_projection *p, char *line, int y, int x)
 	free(trimmed_line);
 	if (!points)
 		return (EXIT_FAILURE);
-	p->x_max = count_points(points);
+	p->x_max = count_points(points); //TODO: line error guard
 	coords = (t_coord *)malloc(sizeof(t_coord) * (p->x_max));
 	if (!coords)
 		return (free_split_return(points));
@@ -438,6 +438,7 @@ int	inc_matrix(t_projection *p, int *cap, int fd, int y)
 int	free_matrix_fd_return(t_projection *p, int fd)
 {
 	free(p->matrix);
+	p->matrix = NULL;
 	close(fd);
 	return (EXIT_FAILURE);
 }
@@ -483,6 +484,7 @@ int	init_mlx(t_projection *p)
 	if (!(p->image))
 	{
 		mlx_close_window(p->mlx);
+		mlx_terminate(p->mlx); 
 		ft_printf("%s\n", mlx_strerror(mlx_errno));
 		return (EXIT_FAILURE);
 	}
@@ -490,6 +492,7 @@ int	init_mlx(t_projection *p)
 	{
 		mlx_delete_image(p->mlx, p->image);
 		mlx_close_window(p->mlx);
+		mlx_terminate(p->mlx); 
 		ft_printf("%s\n", mlx_strerror(mlx_errno));
 		return (EXIT_FAILURE);
 	}
@@ -536,15 +539,16 @@ int32_t	main(int ac, char **av)
 }
 
 /*
+TODO: empty.fdf
+TODO: check file without permissions.
+TODO: invalid map check
+
 TODO: error messages
-TODO: check file without permissions. Empty.
 
 TODO: Leaks, leaks, leaks. Correctly free.
 
-TODO: invalid map check
 TODO: get one valid x to read for line.
-TODO: empty map?
-TODO: max & min int?
+
 
 TODO: process the u,v's initially.
 
