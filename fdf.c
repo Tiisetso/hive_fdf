@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/18 16:29:21 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/18 18:01:44 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,14 +256,24 @@ void	init_projection(t_projection *p)
 	p->width = 1920;
 }
 
-int	count_points(char **points)
+int	set_points(t_projection *p, char **points, int y)
 {
 	int	i;
 
 	i = 0;
 	while (points[i])
 		i++;
-	return (i);
+	if (y == 0)
+		p->x_max = i;
+	else
+	{
+		if (!(p->x_max == i))
+		{
+			ft_printf("Irregular map\n");
+			return (EXIT_FAILURE);
+		}
+	}
+	return (EXIT_SUCCESS);
 }
 
 void	free_split(char **array)
@@ -386,7 +396,12 @@ int	free_return_parse(char **points, t_coord **matrix, int y)
 		return (EXIT_FAILURE);
 	return (EXIT_SUCCESS);
 }
-// TODO: line error guard
+
+int	free_points_return(char **points)
+{
+	free_split(points);
+	return (EXIT_FAILURE);
+}
 
 int	parse(t_projection *p, char *line, int y, int x)
 {
@@ -401,8 +416,9 @@ int	parse(t_projection *p, char *line, int y, int x)
 	points = ft_split(trimmed_line, ' ');
 	free(trimmed_line);
 	if (!points)
-		return (EXIT_FAILURE);
-	p->x_max = count_points(points);
+		return (free_points_return(points));
+	if (set_points(p, points, y))
+		return (free_points_return(points));
 	coords = (t_coord *)malloc(sizeof(t_coord) * (p->x_max));
 	if (!coords)
 		return (free_split_return(points));
@@ -499,7 +515,6 @@ int	init_mlx(t_projection *p)
 	}
 	return (EXIT_SUCCESS);
 }
-// TODO: should be greater than 0 and postive?
 
 void	set_matrix(t_projection *p)
 {
@@ -541,7 +556,10 @@ int32_t	main(int ac, char **av)
 }
 
 /*
-TODO: error messages: permissions, path, empty.
+TODO: error messages: permissions, path, empty files,
+TODO: irregular lines, empty lines.
+
+TODO: should be greater than 0 and positive?
 
 TODO: Leaks, leaks, leaks. Correctly free.
 

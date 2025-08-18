@@ -13,25 +13,27 @@
 #ifndef FDF_H
 # define FDF_H
 
+# include "MLX42/MLX42.h"
+# include "libft.h"
+# include <fcntl.h>
+# include <limits.h>
+# include <math.h>
+# include <stdbool.h>
 # include <stdio.h>
 # include <stdlib.h>
-# include <stdbool.h>
-# include "MLX42/MLX42.h"
-# include <math.h>
-# include "libft.h"
-# include <fcntl.h> 
-# include <limits.h>
 
-typedef struct s_coord {
+typedef struct s_coord
+{
 	int			x;
 	int			y;
 	int			z;
 	int			u;
 	int			v;
 	uint32_t	rgba;
-} t_coord;
+}				t_coord;
 
-typedef struct s_projection {
+typedef struct s_projection
+{
 	mlx_t		*mlx;
 	mlx_image_t	*image;
 	t_coord		**matrix;
@@ -44,8 +46,8 @@ typedef struct s_projection {
 	int			redraw;
 	int			height;
 	int			width;
-} t_projection;
+}				t_projection;
 
-void render(t_projection *projection);
+void			render(t_projection *projection);
 
 #endif
