@@ -1,0 +1,17 @@
+
+{
+  glibc-dl-rpath-strncmp
+  Memcheck:Addr8
+  fun:strncmp
+  ...
+  obj:/usr/lib*/ld-*.so
+}
+
+{
+  glibc-dl-find-object-update
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:_dl_find_object_update
+  ...
+  obj:/usr/lib*/ld-*.so
+}

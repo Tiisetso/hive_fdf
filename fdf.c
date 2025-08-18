@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/18 10:42:51 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/18 12:48:25 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,8 +243,13 @@ void init_projection(t_projection *p)
 {
 	p->x_max = 0;
 	p->y_max = 0;
+	p->gap = 1;
+	p->x_offset = 0;
+	p->y_offset = 0;
+	p->redraw = 1;
 	p->mlx = NULL;
 	p->image = NULL;
+	p->matrix = NULL;
 	p->alpha = 30;
 	p->height = 1920;
 	p->width = 1920;
@@ -272,34 +277,41 @@ void free_split(char **array)
 	free(array);
 }
 
+int assign_coord_z(t_coord *coord, char *z_data)
+{
+	long	long_num;
+
+	long_num = ft_atol(z_data);
+	if ((long_num > 12000) || (long_num < -12000))
+	{
+		ft_printf("Only integers between -12000 and 12000 allowed.\n");
+		return (EXIT_FAILURE);
+	}
+	else
+		coord->z = (int)long_num;
+	return (EXIT_SUCCESS);
+}
+
 int init_coord(t_coord *coord, char **points, int x, int y)
 {
 	char	**coord_data;
-	long	long_num;
 
 	if(ft_strchr(points[x], ','))
 	{
 		coord_data = ft_split(points[x], ',');
-		long_num = ft_atol(coord_data[0]);
-		if ((long_num > INT_MAX) || (long_num < INT_MIN))
+		if(!coord_data)
+			return (EXIT_FAILURE);
+		if (assign_coord_z(coord, coord_data[0]))
 		{
-			ft_printf("Only integer values accepted.\n");
+			free_split(coord_data);
 			return (EXIT_FAILURE);
 		}
-		else
-			coord->z = (int)long_num;
 		free_split(coord_data);
 	}
 	else
 	{
-		long_num = ft_atol(points[x]);
-		if ((long_num > INT_MAX) || (long_num < INT_MIN))
-		{
-			ft_printf("Only integer values accepted.");
+		if (assign_coord_z(coord, points[x]))
 			return (EXIT_FAILURE);
-		}
-		else
-			coord->z = (int)long_num;
 	}
 	coord->x = x;
 	coord->y = y;
@@ -350,11 +362,19 @@ t_coord *parse(char *line, int y, int *x_count)
 	*x_count = count_points(points);
 	coords = (t_coord *)malloc(sizeof(t_coord) * (*x_count));
 	if (!coords)
+	{
+		free_split(points);
 		return (NULL);
+	}
 	x = 0;
 	while (x < *x_count)
 	{
-		init_coord(&coords[x], points, x, y);
+		if (init_coord(&coords[x], points, x, y))
+		{
+			free(coords);
+			free_split(points);
+			return(NULL);
+		}
 		x++;
 	}
 	free_split(points);
@@ -365,7 +385,6 @@ t_coord *parse(char *line, int y, int *x_count)
 int load_matrix(t_projection *projection, char *file)
 {
 	int		fd;
-	
 	char	*line;
 	int x;
 	int y;
@@ -414,8 +433,9 @@ int load_matrix(t_projection *projection, char *file)
 	projection->y_max = y;
 	if (y > 0)
 		return (EXIT_SUCCESS);
-	else
-		return (EXIT_FAILURE);
+	free(projection->matrix);
+	projection->matrix = NULL;
+	return (EXIT_FAILURE);
 }
 
 int init_mlx(t_projection *p)
@@ -457,7 +477,10 @@ int32_t main(int ac, char **av)
 	else
 	{
 		if (((check_file(av[1], ".fdf")) || (load_matrix(&p, av[1]))))
+		{
+			free_matrix(&p);
 			return (EXIT_FAILURE);
+		}
 	}
 	set_matrix(&p);
 	if(init_mlx(&p))
