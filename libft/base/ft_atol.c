@@ -6,11 +6,11 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/15 11:22:10 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/18 13:22:47 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/18 14:48:01 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "../libft.h"
 
 static int	ft_isspace(char c);
 

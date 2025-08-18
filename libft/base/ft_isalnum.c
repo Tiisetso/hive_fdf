@@ -6,11 +6,11 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 09:20:48 by timurray          #+#    #+#             */
-/*   Updated: 2025/04/15 14:54:42 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/18 14:48:10 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "../libft.h"
 
 int	ft_isalnum(int c)
 {

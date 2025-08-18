@@ -6,11 +6,11 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/04 15:47:59 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/01 14:50:39 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/18 14:48:50 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "../libft.h"
 
 static size_t	ft_strcount(char *s, char c);
 static char		**free_str(char **str, size_t i);

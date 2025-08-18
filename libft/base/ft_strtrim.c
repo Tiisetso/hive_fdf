@@ -6,11 +6,11 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/04 14:24:58 by timurray          #+#    #+#             */
-/*   Updated: 2025/05/07 14:50:28 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/18 14:49:20 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "../libft.h"
 
 static int	ft_isset(char c, const char *set)
 {

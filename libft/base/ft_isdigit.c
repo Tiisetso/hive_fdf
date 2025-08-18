@@ -6,11 +6,11 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 09:05:06 by timurray          #+#    #+#             */
-/*   Updated: 2025/05/05 16:08:44 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/18 14:48:22 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "../libft.h"
 
 int	ft_isdigit(int c)
 {

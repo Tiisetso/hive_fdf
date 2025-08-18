@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/18 13:44:17 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/18 14:52:20 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -345,17 +345,17 @@ int free_matrix_return(t_projection *p, int y, int fd)
 	return (EXIT_FAILURE);
 }
 
-t_coord *free_split_return(char **points)
+int free_split_return(char **points)
 {
 	free_split(points);
-	return (NULL);
+	return (EXIT_FAILURE);
 }
 
-t_coord *free_coords_points_return(char **points, t_coord *coords)
+int free_coords_points_return(char **points, t_coord *coords)
 {
 	free(coords);
 	free_split(points);
-	return(NULL);
+	return(EXIT_FAILURE);
 }
 
 int close_fd_return(int fd)
@@ -378,45 +378,68 @@ int load_matrix_return(t_projection *p, int y, int fd)
 	}
 }
 
-t_coord *parse(char *line, int y, int *x_count)
+int free_return_parse(char **points, char *line, t_coord **matrix, int y)
 {
-	int		x;
+	free_split(points);
+	free(line);
+	if(&matrix[y] == NULL)
+		return (EXIT_FAILURE);
+	return (EXIT_SUCCESS);
+}
+
+int parse(t_projection *p, char *line, int y, int x)
+{
 	char	**points;
 	t_coord	*coords;
 	char	*trimmed_line;
 
 	trimmed_line = ft_strtrim(line, " \n\t\v\r\f");
 	if(!trimmed_line)
-		return (NULL);
+		return (EXIT_FAILURE);
 	points = ft_split(trimmed_line, ' ');
 	free(trimmed_line);
 	if (!points)
-		return (NULL);
-	*x_count = count_points(points);
-	coords = (t_coord *)malloc(sizeof(t_coord) * (*x_count));
+		return (EXIT_FAILURE);
+	p->x_max = count_points(points);
+	coords = (t_coord *)malloc(sizeof(t_coord) * (p->x_max));
 	if (!coords)
 		return (free_split_return(points));
-	x = 0;
-	while (x < *x_count)
+	while (x < p->x_max)
 	{
 		if (init_coord(&coords[x], points, x, y))
 			return (free_coords_points_return(points, coords));
 		x++;
 	}
-	free_split(points);
-	return (coords);
+	p->matrix[y] = coords;
+	return (free_return_parse(points, line, p->matrix, y));
+}
+
+int inc_matrix(t_projection *p, int *cap, int fd, int y)
+{
+	t_coord **temp;
+	int i;
+
+	*cap = *cap + 1;
+	temp = (t_coord **)malloc(sizeof(t_coord *) * *cap);
+	if(!temp)
+		return (free_matrix_return(p, y, fd));
+	i = 0;
+	while (i < y)
+	{
+		temp[i] = p->matrix[i];
+		i++;
+	}
+	free(p->matrix);
+	p->matrix = temp;
+	return (EXIT_SUCCESS);
 }
 
 int load_matrix(t_projection *projection, char *file)
 {
 	int		fd;
 	char	*line;
-	int x;
-	int y;
-	int cap;
-	
-	t_coord **temp;
-	int i;
+	int		y;
+	int		cap;
 	
 	fd = open(file, O_RDONLY);
 	if(fd == -1)
@@ -428,27 +451,13 @@ int load_matrix(t_projection *projection, char *file)
 	cap = 1;
 	while ((line = get_next_line(fd)))
 	{
-		x = 0;
-		projection->matrix[y] = parse(line, y, &x);
-		free(line);
-		if(projection->matrix[y] == NULL)
+		if (parse(projection, line, y, 0))
 			return (free_matrix_return(projection, y, fd));
-		if(x > projection->x_max)
-			projection->x_max = x;
 		y++;
 		if (y >= cap)
 		{
-			temp = (t_coord **)malloc(sizeof(t_coord *) * ++cap);
-			if(!temp)
-				return (free_matrix_return(projection, y, fd));
-			i = 0;
-			while (i < y)
-			{
-				temp[i] = projection->matrix[i];
-				i++;
-			}
-			free(projection->matrix);
-			projection->matrix = temp;
+			if(inc_matrix(projection, &cap, fd, y))
+				return (EXIT_FAILURE);
 		}
 	}
 	return (load_matrix_return(projection, y, fd));
@@ -458,24 +467,25 @@ int init_mlx(t_projection *p)
 {
 	if (!(p->mlx = mlx_init(p->width, p->height, "FDF", true)))
 	{
-		// puts(mlx_strerror(mlx_errno));
+		ft_printf("%s\n",mlx_strerror(mlx_errno));
 		return (EXIT_FAILURE);
 	}
 	if (!(p->image = mlx_new_image(p->mlx, p->width, p->height)))
 	{
 		mlx_close_window(p->mlx);
-		// puts(mlx_strerror(mlx_errno));
+		ft_printf("%s\n",mlx_strerror(mlx_errno));
 		return (EXIT_FAILURE);
 	}
 	if (mlx_image_to_window(p->mlx, p->image, 0, 0) == -1)
 	{
 		mlx_delete_image(p->mlx, p->image);
 		mlx_close_window(p->mlx);
-		// puts(mlx_strerror(mlx_errno));
+		ft_printf("%s\n",mlx_strerror(mlx_errno));
 		return (EXIT_FAILURE);
 	}
 	return (EXIT_SUCCESS);
 }
+
 void set_matrix(t_projection *p)
 {
 	p->gap = (int)round(p->height/p->x_max/2) ;
@@ -519,7 +529,6 @@ int32_t main(int ac, char **av)
 TODO: error messages
 TODO: check file without permissions. Empty. 
 
-TODO: Clip functions.
 TODO: Leaks, leaks, leaks. Correctly free.
 
 TODO: invalid map check
