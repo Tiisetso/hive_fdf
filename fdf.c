@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/15 14:58:49 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/18 10:42:51 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,13 +85,13 @@ int check_file(const char *filename, const char *ext)
 		return (!((ft_strncmp(dot, ext, ext_len) == 0) && dot[ext_len] == '\0'));
 }
 
-void line_low(mlx_image_t *img, t_coord start, t_coord end, int dy, int dx)
+void line_low(mlx_image_t *img, t_coord start, t_coord end, int dy)
 {
-	int yi;
-	int d;
-	uint32_t color;
-	
-	color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
+	int	yi;
+	int	d;
+	int	dx;
+
+	dx = end.u - start.u;
 	yi = 1;
 	if (dy < 0)
 	{
@@ -101,7 +101,7 @@ void line_low(mlx_image_t *img, t_coord start, t_coord end, int dy, int dx)
 	d = (2 * dy) - dx;
 	while (start.u <= end.u)
 	{
-		put_pixel_safe(img, start.u, start.v, color);
+		put_pixel_safe(img, start.u, start.v, ft_pixel(0xFF, 0xFF, 0xFF, 0xFF));
 		if (d > 0)
 		{
 			start.v = start.v + yi;
@@ -109,17 +109,17 @@ void line_low(mlx_image_t *img, t_coord start, t_coord end, int dy, int dx)
 		}
 		else
 			d = d + (2*dy);
-		(start.u)++;
+		start.u++;
 	}
 }
 
-void line_high(mlx_image_t *img, t_coord start, t_coord end, int dy, int dx)
+void line_high(mlx_image_t *img, t_coord start, t_coord end, int dx)
 {
-	int			xi;
-	int			d;
-	uint32_t	color;
-	
-	color = ft_pixel(0xFF, 0xFF, 0xFF, 0xFF);
+	int	xi;
+	int	d;
+	int	dy;
+
+	dy = end.v - start.v;
 	xi = 1;
 	if(dx < 0)
 	{
@@ -129,7 +129,7 @@ void line_high(mlx_image_t *img, t_coord start, t_coord end, int dy, int dx)
 	d = (2 * dx) - dy;
 	while (start.v <= end.v)
 	{
-		put_pixel_safe(img, start.u, start.v, color);
+		put_pixel_safe(img, start.u, start.v, ft_pixel(0xFF, 0xFF, 0xFF, 0xFF));
 		if (d > 0)
 		{
 			start.u = start.u + xi;
@@ -137,30 +137,30 @@ void line_high(mlx_image_t *img, t_coord start, t_coord end, int dy, int dx)
 		}
 		else
 			d = d + (2*dx);
-		(start.v)++;
+		start.v++;
 	}
 }
 
 void bresenham(mlx_image_t *img, t_coord start, t_coord end)
 {
-	int dy;
-	int dx;
+	int		dy;
+	int		dx;
 
 	dy = abs(end.v - start.v);
 	dx = abs(end.u - start.u);
 	if (dy < dx)
 	{
 		if (start.u > end.u)
-			line_low(img, end, start, (start.v - end.v), (start.u - end.u));
+			line_low(img, end, start, (start.v - end.v));
 		else
-			line_low(img, start, end, (end.v - start.v), (end.u - start.u));
+			line_low(img, start, end, (end.v - start.v));
 	}
 	else
 	{
 		if (start.v > end.v)
-			line_high(img, end, start, (start.v - end.v), (start.u - end.u));
+			line_high(img, end, start, (start.u - end.u));
 		else
-			line_high(img, start, end, (end.v - start.v), (end.u - start.u));
+			line_high(img, start, end, (end.u - start.u));
 	}
 }
 
@@ -483,15 +483,10 @@ TODO: check file without permissions. Empty.
 TODO: Clip functions.
 TODO: Leaks, leaks, leaks. Correctly free.
 
-TODO: line low+high, passed image. to many var at the moment.
-
 TODO: invalid map check
 TODO: get one valid x to read for line.
 TODO: empty map?
 TODO: max & min int? 
-
-
-TODO: draw line safely
 
 TODO: process the u,v's initially.
 
