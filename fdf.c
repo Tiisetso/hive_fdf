@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/18 13:13:37 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/18 13:44:17 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -358,6 +358,26 @@ t_coord *free_coords_points_return(char **points, t_coord *coords)
 	return(NULL);
 }
 
+int close_fd_return(int fd)
+{
+	close(fd);
+	return (EXIT_FAILURE);
+}
+
+int load_matrix_return(t_projection *p, int y, int fd)
+{
+	close(fd);
+	p->y_max = y;
+	if (y > 0)
+		return (EXIT_SUCCESS);
+	else
+	{
+		free(p->matrix);
+		p->matrix = NULL;
+		return (EXIT_FAILURE);
+	}
+}
+
 t_coord *parse(char *line, int y, int *x_count)
 {
 	int		x;
@@ -387,7 +407,6 @@ t_coord *parse(char *line, int y, int *x_count)
 	return (coords);
 }
 
-
 int load_matrix(t_projection *projection, char *file)
 {
 	int		fd;
@@ -404,10 +423,7 @@ int load_matrix(t_projection *projection, char *file)
 		return (EXIT_FAILURE);
 	projection->matrix = (t_coord **)malloc(sizeof(t_coord *));
 	if (!projection->matrix)
-	{
-		close(fd);
-		return (EXIT_FAILURE);
-	}
+		return (close_fd_return(fd));
 	y = 0;
 	cap = 1;
 	while ((line = get_next_line(fd)))
@@ -435,13 +451,7 @@ int load_matrix(t_projection *projection, char *file)
 			projection->matrix = temp;
 		}
 	}
-	close(fd);
-	projection->y_max = y;
-	if (y > 0)
-		return (EXIT_SUCCESS);
-	free(projection->matrix);
-	projection->matrix = NULL;
-	return (EXIT_FAILURE);
+	return (load_matrix_return(projection, y, fd));
 }
 
 int init_mlx(t_projection *p)
@@ -473,6 +483,12 @@ void set_matrix(t_projection *p)
 	p->x_offset = p->width/2;
 }
 
+int free_projection_return(t_projection *p)
+{
+	free_matrix(p);
+	return (EXIT_FAILURE);
+}
+
 int32_t main(int ac, char **av)
 {
 	t_projection	p;
@@ -483,17 +499,11 @@ int32_t main(int ac, char **av)
 	else
 	{
 		if (((check_file(av[1], ".fdf")) || (load_matrix(&p, av[1]))))
-		{
-			free_matrix(&p);
-			return (EXIT_FAILURE);
-		}
+			return (free_projection_return(&p));
 	}
 	set_matrix(&p);
 	if(init_mlx(&p))
-	{
-		free_matrix(&p);
-		return (EXIT_FAILURE);
-	}
+		return (free_projection_return(&p));
 	mlx_scroll_hook(p.mlx, on_scroll, &p);
 	mlx_loop_hook(p.mlx, ft_hook, &p);
 	mlx_loop(p.mlx);
