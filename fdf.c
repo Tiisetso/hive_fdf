@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/18 12:48:25 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/18 13:13:37 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -345,6 +345,19 @@ int free_matrix_return(t_projection *p, int y, int fd)
 	return (EXIT_FAILURE);
 }
 
+t_coord *free_split_return(char **points)
+{
+	free_split(points);
+	return (NULL);
+}
+
+t_coord *free_coords_points_return(char **points, t_coord *coords)
+{
+	free(coords);
+	free_split(points);
+	return(NULL);
+}
+
 t_coord *parse(char *line, int y, int *x_count)
 {
 	int		x;
@@ -362,19 +375,12 @@ t_coord *parse(char *line, int y, int *x_count)
 	*x_count = count_points(points);
 	coords = (t_coord *)malloc(sizeof(t_coord) * (*x_count));
 	if (!coords)
-	{
-		free_split(points);
-		return (NULL);
-	}
+		return (free_split_return(points));
 	x = 0;
 	while (x < *x_count)
 	{
 		if (init_coord(&coords[x], points, x, y))
-		{
-			free(coords);
-			free_split(points);
-			return(NULL);
-		}
+			return (free_coords_points_return(points, coords));
 		x++;
 	}
 	free_split(points);
