@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 12:56:35 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/19 15:42:36 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/19 17:58:51 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,5 +90,8 @@ int				check_file(const char *filename, const char *ext);
 void			init_projection(t_projection *p);
 int				init_mlx(t_projection *p);
 void			set_matrix(t_projection *p);
+
+int				return_file_error(void);
+int				return_args_error(void);
 
 #endif

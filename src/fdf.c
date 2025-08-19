@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/19 15:41:53 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/19 17:58:23 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ int32_t	main(int ac, char **av)
 
 	init_projection(&p);
 	if (ac != 2)
-		return (EXIT_FAILURE);
+		return (return_args_error());
 	else
 	{
 		if (((check_file(av[1], ".fdf")) || (load_matrix(&p, av[1], 0, 1))))

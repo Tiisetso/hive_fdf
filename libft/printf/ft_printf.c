@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 16:06:31 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/18 14:46:58 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/19 17:21:24 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,41 @@ int	ft_printf(const char *s, ...)
 
 	length = 0;
 	if (!s)
+		return (-1);
+	va_start(args, s);
+	while (*s)
+	{
+		if (*s == '%' && *(s + 1))
+			res = func_select(*++s, &args);
+		else
+			res = ft_putchar_fd(*s, 1);
+		if (res == -1)
+		{
+			va_end(args);
+			return (-1);
+		}
+		length += res;
+		s++;
+	}
+	va_end(args);
+	return ((int)length);
+}
+
+int check_fd(int fd)
+{
+	if (!((fd >= 0) && (fd <= 2)))
+		return (EXIT_FAILURE);
+	return(EXIT_SUCCESS);
+}
+
+int	ft_printfd(int fd, const char *s, ...)
+{
+	va_list	args;
+	ssize_t	length;
+	int		res;
+
+	length = 0;
+	if (!s || check_fd(fd))
 		return (-1);
 	va_start(args, s);
 	while (*s)

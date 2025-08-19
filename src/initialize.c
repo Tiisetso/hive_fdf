@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:37:52 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/19 15:46:14 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/19 17:57:19 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int	load_matrix(t_projection *p, char *file, int y, int cap)
 
 	fd = open(file, O_RDONLY);
 	if (fd == -1)
-		return (EXIT_FAILURE);
+		return (return_file_error());
 	p->matrix = (t_coord **)malloc(sizeof(t_coord *));
 	if (!p->matrix)
 		return (close_fd_return(fd));
@@ -45,14 +45,24 @@ int	check_file(const char *filename, const char *ext)
 {
 	const char	*dot;
 	int			ext_len;
+	int			dot_len;
 
 	dot = ft_strrchr(filename, '.');
-	ext_len = ft_strlen(ext);
 	if ((!dot || dot == filename))
+	{
+		ft_printfd(2, "Please input valid .fdf files.\n");
 		return (EXIT_FAILURE);
+	}
+	ext_len = ft_strlen(ext);
+	dot_len = ft_strlen(dot);
+	if (!(ft_strncmp(dot, ext, ext_len) == 0) || 
+		!(ft_strncmp(ext, dot, dot_len) == 0))
+	{
+		ft_printfd(2, "Incorrect file type, only .fdf accepted.\n");
+		return (EXIT_FAILURE);
+	}
 	else
-		return (!((ft_strncmp(dot, ext, ext_len) == 0)
-				&& dot[ext_len] == '\0'));
+		return (!(dot[ext_len] == '\0'));
 }
 
 void	init_projection(t_projection *p)

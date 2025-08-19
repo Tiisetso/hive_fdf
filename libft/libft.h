@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 16:35:15 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/18 13:22:36 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/19 17:21:33 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 # include <unistd.h>
 
 int		ft_printf(const char *s, ...);
+int		ft_printfd(int fd, const char *s, ...);
 int		ft_putchar_fd(const char c, const int fd);
 int		char_handler(const int c);
 ssize_t	func_select(const char key, va_list *args);
