@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:31:18 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/19 15:45:24 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/19 20:19:29 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	assign_coord_z(t_coord *coord, char *z_data)
 	long_num = ft_atol(z_data);
 	if ((long_num > 12000) || (long_num < -12000))
 	{
-		ft_printf("Only integers between -12000 and 12000 allowed.\n");
+		ft_printfd(2, "Only integers between -12000 and 12000 allowed.\n");
 		return (EXIT_FAILURE);
 	}
 	else
@@ -67,7 +67,7 @@ int	set_points(t_projection *p, char **points, int y)
 	{
 		if (!(p->x_max == i))
 		{
-			ft_printf("Invalid map.\n");
+			ft_printfd(2, "Invalid map.\n");
 			return (EXIT_FAILURE);
 		}
 	}

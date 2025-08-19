@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/19 17:58:23 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/19 18:00:57 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,5 @@ int32_t	main(int ac, char **av)
 }
 
 /*
-TODO: error messages: permissions, path, empty files,
 TODO: Check return values
  */
