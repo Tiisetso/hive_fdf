@@ -6,15 +6,15 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/18 18:20:30 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/19 11:33:11 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fdf.h"
 
-int32_t	ft_pixel(int32_t r, int32_t g, int32_t b, int32_t projection)
+uint32_t	ft_pixel(int32_t r, int32_t g, int32_t b, int32_t a)
 {
-	return (r << 24 | g << 16 | b << 8 | projection);
+	return ((uint32_t)r << 24 | (uint32_t)g << 16 | (uint32_t)b << 8 | a);
 }
 
 void	put_pixel_safe(mlx_image_t *img, int x, int y, uint32_t rgba)
@@ -270,6 +270,7 @@ int	set_points(t_projection *p, char **points, int y)
 		if (!(p->x_max == i))
 		{
 			ft_printf("Irregular map\n");
+			
 			return (EXIT_FAILURE);
 		}
 	}
@@ -389,11 +390,9 @@ int	load_matrix_return(t_projection *p, int y, int fd)
 	}
 }
 
-int	free_return_parse(char **points, t_coord **matrix, int y)
+int	free_return_parse(char **points)
 {
 	free_split(points);
-	if (matrix[y] == NULL)
-		return (EXIT_FAILURE);
 	return (EXIT_SUCCESS);
 }
 
@@ -429,7 +428,7 @@ int	parse(t_projection *p, char *line, int y, int x)
 		x++;
 	}
 	p->matrix[y] = coords;
-	return (free_return_parse(points, p->matrix, y));
+	return (free_return_parse(points));
 }
 
 int	inc_matrix(t_projection *p, int *cap, int fd, int y)
@@ -477,7 +476,10 @@ int	load_matrix(t_projection *p, char *file, int y, int cap)
 	while (line)
 	{
 		if (parse(p, line, y, 0))
+		{
+			free(line);
 			return (free_matrix_return(p, y, fd));
+		}
 		y++;
 		if (y >= cap)
 		{

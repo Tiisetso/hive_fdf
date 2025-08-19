@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/15 12:44:43 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/18 14:47:22 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/19 11:41:55 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,9 +41,12 @@ char	*ft_read_line(char *read_line, int fd)
 			break ;
 		buf[count] = '\0';
 		temp = ft_strjoin(read_line, buf);
-		if (!temp)
-			return (NULL);
 		free(read_line);
+		if (!temp)
+		{
+			free(buf);
+			return (NULL);
+		}
 		read_line = temp;
 	}
 	free(buf);
@@ -79,28 +82,29 @@ char	*ft_n_exist(const char *s, int c)
 
 char	*get_next_line(int fd)
 {
-	static char	*read_line;
+	static char	*r;
 	char		*line;
-	char		*temp;
-	int			n_index;
-	int			length;
+	char		*t;
+	int			i;
 
 	if (fd < 0 || BUFFER_SIZE < 1)
 		return (NULL);
-	read_line = ft_read_line(read_line, fd);
-	if (!read_line || *read_line == '\0')
+	r = ft_read_line(r, fd);
+	if (!r || *r == '\0')
 	{
-		free(read_line);
-		read_line = NULL;
+		free(r);
+		r = NULL;
 		return (NULL);
 	}
-	n_index = ft_get_n_index(read_line, '\n');
-	line = ft_substr(read_line, 0, n_index + 1);
+	i = ft_get_n_index(r, '\n');
+	line = ft_substr(r, 0, (size_t)i + 1);
 	if (!line)
 		return (NULL);
-	length = (ft_strlen(read_line) - n_index);
-	temp = ft_substr(read_line, n_index + 1, length);
-	free(read_line);
-	read_line = temp;
+	if ((size_t)(i + 1) < ft_strlen(r))
+		t = ft_substr(r, (unsigned int)(i + 1), ft_strlen(r) - (size_t)(i + 1));
+	else
+		t = NULL;
+	free(r);
+	r = t;
 	return (line);
 }
