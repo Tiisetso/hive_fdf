@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/19 11:33:11 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/19 11:53:22 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -476,10 +476,7 @@ int	load_matrix(t_projection *p, char *file, int y, int cap)
 	while (line)
 	{
 		if (parse(p, line, y, 0))
-		{
-			free(line);
 			return (free_matrix_return(p, y, fd));
-		}
 		y++;
 		if (y >= cap)
 		{
