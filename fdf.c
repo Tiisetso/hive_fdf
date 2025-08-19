@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/19 11:53:22 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/19 14:53:00 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,6 +256,21 @@ void	init_projection(t_projection *p)
 	p->width = 1920;
 }
 
+void	free_split(char **array)
+{
+	int	i;
+
+	if (!array)
+		return ;
+	i = 0;
+	while (array[i])
+	{
+		free(array[i]);
+		i++;
+	}
+	free(array);
+}
+
 int	set_points(t_projection *p, char **points, int y)
 {
 	int	i;
@@ -269,24 +284,11 @@ int	set_points(t_projection *p, char **points, int y)
 	{
 		if (!(p->x_max == i))
 		{
-			ft_printf("Irregular map\n");
-			
+			ft_printf("Invalid map.\n");
 			return (EXIT_FAILURE);
 		}
 	}
 	return (EXIT_SUCCESS);
-}
-
-void	free_split(char **array)
-{
-	int	i;
-
-	i = 0;
-	if (!array)
-		return ;
-	while (array[i])
-		free(array[i++]);
-	free(array);
 }
 
 int	assign_coord_z(t_coord *coord, char *z_data)
@@ -349,8 +351,13 @@ void	free_matrix(t_projection *p)
 	p->y_max = 0;
 }
 
-int	free_matrix_return(t_projection *p, int y, int fd)
+int	free_matrix_return(t_projection *p, int y, int fd, char *line)
 {
+	while (line)
+	{
+		free(line);
+		line = get_next_line(fd);
+	}
 	p->y_max = y;
 	free_matrix(p);
 	close(fd);
@@ -409,7 +416,6 @@ int	parse(t_projection *p, char *line, int y, int x)
 	char	*trimmed_line;
 
 	trimmed_line = ft_strtrim(line, " \n\t\v\r\f");
-	free(line);
 	if (!trimmed_line)
 		return (EXIT_FAILURE);
 	points = ft_split(trimmed_line, ' ');
@@ -439,7 +445,7 @@ int	inc_matrix(t_projection *p, int *cap, int fd, int y)
 	*cap = *cap + 1;
 	temp = (t_coord **)malloc(sizeof(t_coord *) * *cap);
 	if (!temp)
-		return (free_matrix_return(p, y, fd));
+		return (free_matrix_return(p, y, fd, NULL));
 	i = 0;
 	while (i < y)
 	{
@@ -476,9 +482,9 @@ int	load_matrix(t_projection *p, char *file, int y, int cap)
 	while (line)
 	{
 		if (parse(p, line, y, 0))
-			return (free_matrix_return(p, y, fd));
-		y++;
-		if (y >= cap)
+			return (free_matrix_return(p, y, fd, line));
+		free(line);
+		if (++y >= cap)
 		{
 			if (inc_matrix(p, &cap, fd, y))
 				return (EXIT_FAILURE);
@@ -556,9 +562,5 @@ int32_t	main(int ac, char **av)
 
 /*
 TODO: error messages: permissions, path, empty files,
-TODO: irregular lines, empty lines.
-
-TODO: Leaks, leaks, leaks. Correctly free.
-
 TODO: Check return values
  */
