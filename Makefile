@@ -6,7 +6,7 @@
 #    By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/08 13:01:37 by timurray          #+#    #+#              #
-#    Updated: 2025/08/19 17:39:14 by timurray         ###   ########.fr        #
+#    Updated: 2025/08/20 09:49:54 by timurray         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -69,9 +69,6 @@ clean:
 fclean: clean
 	rm -f $(NAME)
 	make fclean -C $(LIBFT_DIR)
-
-run: $(NAME)
-	./$(NAME)
 
 re: fclean all
 

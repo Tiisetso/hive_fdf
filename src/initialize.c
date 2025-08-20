@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:37:52 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/19 17:57:19 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/20 10:04:26 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,8 +55,8 @@ int	check_file(const char *filename, const char *ext)
 	}
 	ext_len = ft_strlen(ext);
 	dot_len = ft_strlen(dot);
-	if (!(ft_strncmp(dot, ext, ext_len) == 0) || 
-		!(ft_strncmp(ext, dot, dot_len) == 0))
+	if (!(ft_strncmp(dot, ext, ext_len) == 0) || !(ft_strncmp(ext, dot,
+				dot_len) == 0))
 	{
 		ft_printfd(2, "Incorrect file type, only .fdf accepted.\n");
 		return (EXIT_FAILURE);
@@ -86,7 +86,7 @@ int	init_mlx(t_projection *p)
 	p->mlx = mlx_init(p->width, p->height, "FDF", true);
 	if (!(p->mlx))
 	{
-		ft_printf("%s\n", mlx_strerror(mlx_errno));
+		ft_printfd(2, "%s\n", mlx_strerror(mlx_errno));
 		return (EXIT_FAILURE);
 	}
 	p->image = mlx_new_image(p->mlx, p->width, p->height);
@@ -94,7 +94,7 @@ int	init_mlx(t_projection *p)
 	{
 		mlx_close_window(p->mlx);
 		mlx_terminate(p->mlx);
-		ft_printf("%s\n", mlx_strerror(mlx_errno));
+		ft_printfd(2, "%s\n", mlx_strerror(mlx_errno));
 		return (EXIT_FAILURE);
 	}
 	if (mlx_image_to_window(p->mlx, p->image, 0, 0) == -1)
@@ -102,7 +102,7 @@ int	init_mlx(t_projection *p)
 		mlx_delete_image(p->mlx, p->image);
 		mlx_close_window(p->mlx);
 		mlx_terminate(p->mlx);
-		ft_printf("%s\n", mlx_strerror(mlx_errno));
+		ft_printfd(2, "%s\n", mlx_strerror(mlx_errno));
 		return (EXIT_FAILURE);
 	}
 	return (EXIT_SUCCESS);

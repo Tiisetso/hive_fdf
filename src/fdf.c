@@ -6,7 +6,7 @@
 /*   By: timurray <timurray@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 11:40:33 by timurray          #+#    #+#             */
-/*   Updated: 2025/08/19 18:00:57 by timurray         ###   ########.fr       */
+/*   Updated: 2025/08/20 09:43:54 by timurray         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,3 @@ int32_t	main(int ac, char **av)
 	free_matrix(&p);
 	return (EXIT_SUCCESS);
 }
-
-/*
-TODO: Check return values
- */

@@ -12,13 +12,13 @@
 
 #include "../include/fdf.h"
 
-int return_file_error(void)
+int	return_file_error(void)
 {
 	ft_printfd(2, "File not found.\n");
 	return (EXIT_FAILURE);
 }
 
-int return_args_error(void)
+int	return_args_error(void)
 {
 	ft_printfd(2, "Enter single valid .fdf map argument.\n");
 	return (EXIT_FAILURE);
