@@ -66,11 +66,11 @@ int	ft_printf(const char *s, ...)
 	return ((int)length);
 }
 
-int check_fd(int fd)
+int	check_fd(int fd)
 {
 	if (!((fd >= 0) && (fd <= 2)))
 		return (EXIT_FAILURE);
-	return(EXIT_SUCCESS);
+	return (EXIT_SUCCESS);
 }
 
 int	ft_printfd(int fd, const char *s, ...)
